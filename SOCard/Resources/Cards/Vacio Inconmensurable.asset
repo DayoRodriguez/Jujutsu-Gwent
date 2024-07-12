@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51f8afbfb5da8e24c81d29301bc9427b, type: 3}
+  m_Name: Vacio Inconmensurable
+  m_EditorClassIdentifier: 
+  id: 34
+  name: Vacio Inconmensurable
+  effect: Destroy every card in the grow with the greatest attack in each field.
+    If your lider card is Satoru Gojo destroy just the rival's grow
+  faction: 
+  spriteImage: {fileID: 21300000, guid: 455db7456fa67b945945ac0b27e4c346, type: 3}
+  IsActivated: 0
+  isLider: 0
+  cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
+  isSpecial: 1
+  type: Climate

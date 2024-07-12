@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51f8afbfb5da8e24c81d29301bc9427b, type: 3}
+  m_Name: Mahoraga's Ritual
+  m_EditorClassIdentifier: 
+  id: 22
+  name: Mahoraga's Ritual
+  effect: Tribute the card with more attack in the M grow and summon a Divine Genral
+    Mahoraga from your deck or hand
+  faction: Neutral
+  spriteImage: {fileID: 21300000, guid: d31d637bf899b274caed2279e9b0926b, type: 3}
+  IsActivated: 0
+  isLider: 0
+  cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
+  isSpecial: 0
+  type: Increase

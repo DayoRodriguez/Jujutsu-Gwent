@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 284e40dd758334345957cde5ac9b1de1, type: 3}
+  m_Name: Kokichi Muta
+  m_EditorClassIdentifier: 
+  id: 20
+  name: Kokichi Muta
+  effect: Calculate the attack's average in the rival's field and target a grow in
+    any field and change the attack of every card in the target grow to that average
+  faction: Magician
+  spriteImage: {fileID: 21300000, guid: 8c4e48885f53dfe418784dbb52d5192f, type: 3}
+  IsActivated: 0
+  isLider: 0
+  cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
+  isSpecial: 1
+  isUnit: 1
+  power: 12
+  kindAttack1: M
+  kindAttack2: R
+  kindAttack3: S
