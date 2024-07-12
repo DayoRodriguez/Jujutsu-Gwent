@@ -1296,6 +1296,8 @@ GameObject:
   - component: {fileID: 815482383}
   - component: {fileID: 815482382}
   - component: {fileID: 815482384}
+  - component: {fileID: 815482385}
+  - component: {fileID: 815482386}
   m_Layer: 5
   m_Name: Deck
   m_TagString: Untagged
@@ -1373,6 +1375,38 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rowType: 8
+--- !u!114 &815482385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 815482380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e90ba3758446e4b99bca45e5a4d530, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &815482386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 815482380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca991a5248c7c184a828a9beb2d6da1a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  deck: []
+  opponentDeck: []
+  CardsDeck: {fileID: 0}
+  OpponentCardsDeck: {fileID: 0}
+  PayerDeck: {fileID: 815482381}
+  OpponentPayerDeck: {fileID: 0}
+  PlayerHand: {fileID: 0}
+  OpponentPlayerHand: {fileID: 0}
 --- !u!1 &837735531
 GameObject:
   m_ObjectHideFlags: 0

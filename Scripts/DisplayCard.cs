@@ -17,7 +17,8 @@ public class DisplayCard : MonoBehaviour
     {
         if(card!= null)
         {
-            imageCard.sprite = card.spriteImage;
+            if(!card.IsActivated) imageCard.sprite = card.cardBack;
+            else imageCard.sprite = card.spriteImage;
         }
     }
 }
