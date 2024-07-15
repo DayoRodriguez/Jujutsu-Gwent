@@ -13,12 +13,19 @@ public class DisplayCard : MonoBehaviour
     {
         imageCard = GetComponent<Image>();
     }
+
     void Start()
     {
-        if(card!= null)
+
+    }
+    public void SetUp(Card c)
+    {
+        if(c != null)
         {
-            if(!card.IsActivated) imageCard.sprite = card.cardBack;
-            else imageCard.sprite = card.spriteImage;
+            card = c;
+            if(imageCard == null) imageCard = GetComponent<Image>();
+            if(!c.IsActivated) imageCard.sprite = c.cardBack;
+            else imageCard.sprite = c.spriteImage;
         }
     }
 }
