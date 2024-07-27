@@ -5,8 +5,11 @@ using UnityEngine.EventSystems;
 
 public class RowClickHandler : MonoBehaviour, IPointerClickHandler
 {
-    public enum RowType {Melee, Ranged, Siege, Special, WeatherMelee, WeatherRanged, WeatherSiege, Leader, Deck, Hand, Graveyard, 
-    OpponentMelee, OpponentRanged, OpponentSiege, OpponentSpecial, OpponentWeatherMelee, OpponentWeatherRanged, OpponentWeatherSiege, OpponentLeader, OpponentDeck, OpponentHand, OpponentGraveyard}
+    public enum RowType 
+    {
+        Melee, Ranged, Siege, Special, WeatherMelee, WeatherRanged, WeatherSiege, Leader, Deck, Hand, Graveyard, 
+        OpponentMelee, OpponentRanged, OpponentSiege, OpponentSpecial, OpponentWeatherMelee, OpponentWeatherRanged, OpponentWeatherSiege, OpponentLeader, OpponentDeck, OpponentHand, OpponentGraveyard
+    }
     public RowType rowType;
 
     public static event System.Action<RowType> OnRowClicked;

@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class CardLogic : MonoBehaviour
+public class CardLogic : MonoBehaviour, IPointerClickHandler
 {   
     public Card card;
     private BoardManager boardManager;
@@ -13,35 +14,28 @@ public class CardLogic : MonoBehaviour
         boardManager = FindObjectOfType<BoardManager>();
     }
 
-    void OnMouseDown()
+    public void OnPointerClick(PointerEventData eventData)
     {
         if(boardManager != null)
         {
-            boardManager.selectedCard = this.gameObject;
-        }
-    }
+            DisplayCard displayCard = GetComponent<DisplayCard>();
 
-    /*public void PlayCard()
-    {
-        if(boardManager != null)
-        {
-            if(card != null && boardManager.selectedRow != null)
+            if (displayCard.card.owner == Card.Owner.Player)
             {
-                string[] types = card.GetKind();
-
-                if(types[0] == "M" && boardManager.selectedRow == boardManager.tranformMeleeRow)
-                {
-                    boardManager.ActiveCard(this.gameObject, boardManager.selectedRow);      
-                }
-                if(types[1] == "R" && boardManager.selectedRow == boardManager.tranformRangedRow)
-                {
-                    boardManager.ActiveCard(this.gameObject, boardManager.selectedRow);      
-                }
-                if(types[2] == "S" && boardManager.selectedRow == boardManager.tranformSeigeRow)
-                {
-                    boardManager.ActiveCard(this.gameObject, boardManager.selectedRow);      
-                }
+                boardManager.selectedCard = this.gameObject;
+                Debug.Log("Player card selected: " + this.gameObject.name);
+                Debug.Log("La carta tiene un owner "+ displayCard.card.owner.ToString());
+            }
+            else if (displayCard.card.owner == Card.Owner.Opponent)
+            {
+                boardManager.opponentSelectedCard = this.gameObject;
+                Debug.Log("Opponent card selected: " + this.gameObject.name);
+                Debug.Log("La carta tiene un owner "+ displayCard.card.owner.ToString());
+            }
+            if(!card.HasBeenMulligan)
+            {
+                card.IsSelected = !card.IsSelected;
             }
         }
-    }*/
+    }
 }

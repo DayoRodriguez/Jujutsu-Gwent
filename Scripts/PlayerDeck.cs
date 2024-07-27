@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Search;
 using UnityEngine;
 
 public class PlayerDeck : MonoBehaviour
@@ -8,8 +9,10 @@ public class PlayerDeck : MonoBehaviour
     public List<Card> opponentDeck = new List<Card>();
     private bool playerLeaderInstantiated = false;
     private bool opponentLeaderInstantiated = false;
+    private int handMaxSide = 10;
 
     public GameObject Cards;
+    public GameObject StartedSMS;
 
     public Transform playerDeck;
     public Transform OpponentPlayerDeck;
@@ -25,10 +28,15 @@ public class PlayerDeck : MonoBehaviour
     {
         DeckCreator("Magician", deck, ref playerLeaderInstantiated, LeaderCard);
         InstantiateDeck(deck, playerDeck); 
-        
+
         DeckCreator("Curse", opponentDeck, ref opponentLeaderInstantiated, OpponentLeaderCard);  
-        InstantiateDeck(opponentDeck, OpponentPlayerDeck); 
-    }
+        InstantiateDeck(opponentDeck, OpponentPlayerDeck);
+
+        FirstDraw(PlayerHand,playerDeck);
+        FirstDraw(OpponentPlayerHand,OpponentPlayerDeck);
+
+        StartCoroutine(FirtsDrawPhases());
+;    }
 
     // Update is called once per frame
     void Update()
@@ -94,11 +102,6 @@ public class PlayerDeck : MonoBehaviour
 
     private void InstantiateDeck(List<Card> deck, Transform CardsInDeck)
     {
-        foreach(Transform child in CardsInDeck)
-        {
-            Destroy(child.gameObject);
-        }
-
         foreach(Card c in deck)
         {
            
@@ -124,6 +127,155 @@ public class PlayerDeck : MonoBehaviour
             }
             else Debug.Log("La carta no fue cargada");
         }
+    }
+
+    private void FirstDraw(Transform hand, Transform deck)
+    {
+        DisplayCard[] cardsToDraw = deck.GetComponentsInChildren<DisplayCard>();
+        
+        for(int i = 0; i < handMaxSide; i++)
+        {
+            int random = Random.Range(0, cardsToDraw.Length);
+            DisplayCard selectedCard = cardsToDraw[random];
+            cardsToDraw = RemovedCardFromArray(cardsToDraw, random);
+
+            selectedCard.card.IsActivated = true;
+            Card copyCard = Instantiate(selectedCard.card);
+            copyCard.IsActivated = true;
+            selectedCard.SetUp(copyCard);
+
+            selectedCard.transform.SetParent(hand);
+            selectedCard.transform.localPosition = Vector3.zero;
+            selectedCard.transform.localRotation = Quaternion.identity;
+            selectedCard.transform.localScale = Vector3.one;
+
+            if(selectedCard.gameObject.GetComponent<CardLogic>() == null)
+            {
+                selectedCard.gameObject.AddComponent<CardLogic>();
+            }
+            
+            if(hand == PlayerHand)
+            {
+                selectedCard.card.owner = Card.Owner.Player;
+                Debug.Log("La carta es" + selectedCard.card.name);
+                Debug.Log("La carta esta en la mano del " + selectedCard.card.owner.ToString());
+            }
+            else if(hand == OpponentPlayerHand)
+            {
+                selectedCard.card.owner = Card.Owner.Opponent;
+                Debug.Log("La carta es" + selectedCard.card.name);
+                Debug.Log("La carta esta en la mano del " + selectedCard.card.owner.ToString());
+            }
+        }
+    }
+
+    private IEnumerator FirtsDrawPhases()
+    {
+        //Inicia la Fase Mulligan
+        yield return StartCoroutine(StartMulliganPhase());
+
+        //Muestra el sms de que comienza el duelo
+        yield return StartCoroutine(ShowStartSMS());    
+    } 
+
+    private IEnumerator StartMulliganPhase()
+    {
+        //Fase Mulligan de Player
+        yield return StartCoroutine(MulliganPhase(PlayerHand, playerDeck));
+
+        //Fase Mulligan de Opponent
+        yield return StartCoroutine(MulliganPhase(OpponentPlayerHand, OpponentPlayerDeck));
+
+        Debug.Log("La fase de Mulligan ha sido completada");
+    }
+
+    private IEnumerator MulliganPhase(Transform hand, Transform deck)
+    {
+        DisplayCard[] cardsInHand = hand.GetComponentsInChildren<DisplayCard>();
+        int maxMulligan = 2;
+        int mulliganCount = 0;
+        MulliganManager mulliganManager = FindObjectOfType<MulliganManager>();
+        if(mulliganManager == null)
+        {
+            Debug.Log("No se encontro MulliganManager en la escena");
+            yield break;
+        }
+        //string sms = (hand == PlayerHand) ? "Player, select the card that you want to change" : "Opponent, select the card that you want to change";
+        mulliganManager.ShowMulliganUI(true);
+
+        yield return new WaitUntil(() => !mulliganManager.mulliganPanel.activeSelf);
+
+        float timer = 10f;
+        while(timer > 0 && mulliganCount < maxMulligan)
+        {
+            timer -= Time.deltaTime;
+            
+            if(mulliganCount < maxMulligan)
+            {
+                foreach(DisplayCard cardH in cardsInHand)
+                {
+                    if(cardH.gameObject.GetComponent<CardLogic>() == null)
+                    {
+                        cardH.gameObject.AddComponent<CardLogic>();
+                    }
+                    if(cardH.card.IsSelected && !cardH.card.HasBeenMulligan)
+                    {
+                        mulliganCount ++;
+                        cardH.card.HasBeenMulligan = true;
+                        cardH.card.IsSelected = false;
+                        cardH.card.IsActivated = false;
+                        cardH.SetUp(cardH.card);
+
+                        cardH.transform.SetParent(deck);
+                        cardH.transform.localPosition = Vector3.zero;
+                        cardH.transform.localRotation = Quaternion.identity;
+                        cardH.transform.localScale = Vector3.one;
+
+                        DrawCard(hand, deck);
+                    }
+                }
+            }
+            yield return null;
+        }
+        mulliganManager.ShowMulliganUI(false);
+    }
+
+    private IEnumerator ShowStartSMS()
+    {
+        StartedSMS.SetActive(true);
+        yield return new WaitForSeconds(1);
+        StartedSMS.SetActive(false); 
+    }
+
+    private void DrawCard(Transform hand, Transform deck)
+    {
+        DisplayCard[] cardsToDraw = deck.GetComponentsInChildren<DisplayCard>();;
+        int selector = Random.Range(0, cardsToDraw.Length);
+        DisplayCard cardD = cardsToDraw[selector];
+
+            if(cardD.gameObject.GetComponent<CardLogic>() == null)
+            {
+                cardD.gameObject.AddComponent<CardLogic>();
+            }
+
+        cardD.card.IsActivated = true;
+        cardD.SetUp(cardD.card);
+
+        cardD.transform.SetParent(hand);
+        cardD.transform.localPosition = Vector3.zero;
+        cardD.transform.localRotation = Quaternion.identity;
+        cardD.transform.localScale = Vector3.one;
+        
+        if(hand == PlayerHand) cardD.card.owner = Card.Owner.Player;
+        if(hand == OpponentPlayerHand) cardD.card.owner = Card.Owner.Opponent;
+
+    }
+
+    private DisplayCard[] RemovedCardFromArray(DisplayCard[] array, int index)
+    {
+        List<DisplayCard> list = new List<DisplayCard>(array);
+        list.RemoveAt(index);
+        return list.ToArray();
     }
     
     public static int Count(Card card, List<Card> deck)

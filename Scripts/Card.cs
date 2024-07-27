@@ -17,6 +17,13 @@ public abstract class Card : ScriptableObject
     public Sprite cardBack;
     public bool isSpecial;
     public bool isUnit;
+    public enum Owner 
+    {
+        Player, Opponent
+    }
+    public Owner owner;
+    public bool IsSelected {get; set;} = false;
+    public bool HasBeenMulligan  {get; set;} = false;
 
     public abstract string[] GetKind();
 }
