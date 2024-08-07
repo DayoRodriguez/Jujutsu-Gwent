@@ -32,10 +32,10 @@ public class PlayerDeck : MonoBehaviour
         DeckCreator("Curse", opponentDeck, ref opponentLeaderInstantiated, OpponentLeaderCard);  
         InstantiateDeck(opponentDeck, OpponentPlayerDeck);
 
-        FirstDraw(PlayerHand,playerDeck);
-        FirstDraw(OpponentPlayerHand,OpponentPlayerDeck);
+        // FirstDraw(PlayerHand,playerDeck);
+        // FirstDraw(OpponentPlayerHand,OpponentPlayerDeck);
 
-        StartCoroutine(FirtsDrawPhases());
+        // StartCoroutine(FirtsDrawPhases());
 ;    }
 
     // Update is called once per frame
@@ -76,7 +76,7 @@ public class PlayerDeck : MonoBehaviour
                     leaderDisplayCard.SetUp(cardLider);
                 }
                 leaderInstantiated = true;
-                    //deck.Add(cardLider);
+
                 break;
             }    
         }
@@ -85,7 +85,7 @@ public class PlayerDeck : MonoBehaviour
             int counter = Random.Range(0,CardDataBase.cardData.Count);
             Card auxCard = CardDataBase.cardData[counter];                       
             if(!auxCard.isLider && (auxCard.faction.ToLower().Equals(cardLider.faction.ToLower()) 
-            || auxCard.faction.ToLower().Equals("neutral")))
+            || auxCard.faction.ToLower().Equals("neutral")) && !auxCard.name.Contains("Token"))
             {
                 if(!deck.Contains(auxCard))
                 {
@@ -129,7 +129,7 @@ public class PlayerDeck : MonoBehaviour
         }
     }
 
-    private void FirstDraw(Transform hand, Transform deck)
+    public void FirstDraw(Transform hand, Transform deck)
     {
         DisplayCard[] cardsToDraw = deck.GetComponentsInChildren<DisplayCard>();
         
@@ -166,10 +166,10 @@ public class PlayerDeck : MonoBehaviour
                 Debug.Log("La carta es" + selectedCard.card.name);
                 Debug.Log("La carta esta en la mano del " + selectedCard.card.owner.ToString());
             }
-        }
+        }    
     }
 
-    private IEnumerator FirtsDrawPhases()
+    public IEnumerator FirtsDrawPhases()
     {
         //Inicia la Fase Mulligan
         yield return StartCoroutine(StartMulliganPhase());
@@ -191,27 +191,26 @@ public class PlayerDeck : MonoBehaviour
 
     private IEnumerator MulliganPhase(Transform hand, Transform deck)
     {
+        //Revisar por que este metodo no se ejecuta correctamente el cambio de cartas el comenzar la partida
         DisplayCard[] cardsInHand = hand.GetComponentsInChildren<DisplayCard>();
         int maxMulligan = 2;
         int mulliganCount = 0;
         MulliganManager mulliganManager = FindObjectOfType<MulliganManager>();
+        Debug.Log("La mano tiene " + cardsInHand.Length);
         if(mulliganManager == null)
         {
             Debug.Log("No se encontro MulliganManager en la escena");
             yield break;
         }
-        //string sms = (hand == PlayerHand) ? "Player, select the card that you want to change" : "Opponent, select the card that you want to change";
-        mulliganManager.ShowMulliganUI(true);
 
+        mulliganManager.ShowMulliganUI(true);
         yield return new WaitUntil(() => !mulliganManager.mulliganPanel.activeSelf);
 
         float timer = 10f;
         while(timer > 0 && mulliganCount < maxMulligan)
         {
             timer -= Time.deltaTime;
-            
-            if(mulliganCount < maxMulligan)
-            {
+
                 foreach(DisplayCard cardH in cardsInHand)
                 {
                     if(cardH.gameObject.GetComponent<CardLogic>() == null)
@@ -234,13 +233,12 @@ public class PlayerDeck : MonoBehaviour
                         DrawCard(hand, deck);
                     }
                 }
+                yield return null;
             }
-            yield return null;
+            mulliganManager.ShowMulliganUI(false);
         }
-        mulliganManager.ShowMulliganUI(false);
-    }
 
-    private IEnumerator ShowStartSMS()
+    public IEnumerator ShowStartSMS()
     {
         StartedSMS.SetActive(true);
         yield return new WaitForSeconds(1);

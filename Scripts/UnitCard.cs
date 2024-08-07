@@ -39,6 +39,11 @@ public class UnitCard : Card
         return types;
     }
 
+    public override int GetPower()
+    {
+        return this.power;
+    }
+
     /*public UnitCard(int id, string name, string effect, string faction, string type, int power, string kindAttack1, string kindAttack2, string kindAttack3)
     {
         this.id = id;

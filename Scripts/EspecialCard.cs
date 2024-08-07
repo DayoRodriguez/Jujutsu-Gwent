@@ -32,4 +32,9 @@ public class EspecialCard : Card
         string[] kind = {type};
         return kind;
     }
+
+    public override int GetPower()
+    {
+        return 0;
+    }
 }

@@ -13,7 +13,7 @@
         public Transform transformWeatherSeigeSlot;
         public Transform transformLeaderCardSlot;
         public Transform transformDeck;
-        public Transform transformPayerHand;
+        public Transform transformPlayerHand;
         public Transform transformGraveyard;
 
 
@@ -35,12 +35,31 @@
         public Transform opponentSelectedRow;
         public GameObject opponentSelectedCard;
 
+        public GameManager gameManager;
+
+        private bool playerHasPerformedAction = false;
+        private bool opponentHasPerformedAction = false;
+
+        void Start()
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
         public void ActiveCard(GameObject card, Transform row)
         {
             card.transform.SetParent(row);
             card.transform.localPosition = Vector3.zero;
             card.transform.localRotation = Quaternion.identity;
             card.transform.localScale = Vector3.one;
+            DisplayCard cardD = card.GetComponent<DisplayCard>();
+            if(cardD.card.owner == Card.Owner.Player)
+            {
+                playerHasPerformedAction = true;
+            }
+            else
+            {
+                opponentHasPerformedAction = true;
+            }
         }
 
         private void OnEnable()
@@ -85,7 +104,7 @@
                         selectedRow = transformDeck;
                         break;
                     case RowClickHandler.RowType.Hand:
-                        selectedRow = transformPayerHand;
+                        selectedRow = transformPlayerHand;
                         break;
                     case RowClickHandler.RowType.Graveyard:
                         selectedRow = transformGraveyard;
@@ -128,50 +147,108 @@
                         opponentSelectedRow = null;
                         break;
             }
-
-            if(selectedCard != null && selectedRow != null)
+            if(gameManager.actualState == GameManager.GameState.PlayerTurn)
             {
-                HandleCardActivation(selectedCard, selectedRow);
-                selectedCard = null;
-                selectedRow = null;   
+                if(selectedCard != null && selectedRow != null)
+                {
+                    if(selectedCard.transform.parent == transformPlayerHand)
+                    {
+                        HandleCardActivation(selectedCard, selectedRow);
+                        selectedCard = null;
+                        selectedRow = null;
+                    }
+                }
             }
-            if(opponentSelectedCard != null && opponentSelectedRow != null)
+            else if(gameManager.actualState == GameManager.GameState.OpponentTurn)
             {
-                HandleCardActivation(opponentSelectedCard, opponentSelectedRow);
-                opponentSelectedCard = null;
-                opponentSelectedRow = null;   
+                if(opponentSelectedCard != null && opponentSelectedRow != null)
+                {
+                    if(opponentSelectedCard.transform.parent == opponentTransformPlayerHand)
+                    {
+                        HandleCardActivation(opponentSelectedCard, opponentSelectedRow);
+                        opponentSelectedCard = null;
+                        opponentSelectedRow = null;   
+                    }                
+                }
             }
         }
 
-        private void HandleCardActivation(GameObject cardObject, Transform row)
+        public void HandleCardActivation(GameObject cardObject, Transform row)
         {
             Card card = cardObject.GetComponent<DisplayCard>().card;
-        if (card.isUnit)
-        {
-            string[] types = card.GetKind();
-            if ((types[0] == "M" && row == transformMeleeRow) ||
-                (types[1] == "R" && row == transformRangedRow) ||
-                (types[2] == "S" && row == transformSeigeRow) ||
-                (types[0] == "M" && row == opponentTransformMeleeRow) ||
-                (types[1] == "R" && row == opponentTransformRangedRow) ||
-                (types[2] == "S" && row == opponentTransformSeigeRow))
+            if (card.isUnit)
             {
-                ActiveCard(cardObject, row);
+                string[] types = card.GetKind();
+                if ((types[0] == "M" && row == transformMeleeRow) ||
+                    (types[1] == "R" && row == transformRangedRow) ||
+                    (types[2] == "S" && row == transformSeigeRow) ||
+                    (types[0] == "M" && row == opponentTransformMeleeRow) ||
+                    (types[1] == "R" && row == opponentTransformRangedRow) ||
+                    (types[2] == "S" && row == opponentTransformSeigeRow))
+                {
+                    ActiveCard(cardObject, row);
+                }
+            }
+            else
+            {
+                string[] type = card.GetKind();
+                if ((type[0] == "Climate" || type[0] == "Dump") && 
+                    (row == transformWeatherMeleeSlot || row == transformWeatherRangedSlot || row == transformWeatherSeigeSlot ||
+                    row == opponentTransformWeatherMeleeSlot || row == opponentTransformWeatherRangedSlot || row == opponentTransformWeatherSeigeSlot))
+                {
+                    ActiveCard(cardObject, row);
+                }
+                if (type[0] == "Increase" && (row == transformSpecialCardSlot || row == opponentTransformSpecialCardSlot))
+                {
+                    ActiveCard(cardObject, row);
+                }
             }
         }
-        else
+
+        public bool PlayerHasEarnigActions()
         {
-            string[] type = card.GetKind();
-            if ((type[0] == "Climate" || type[0] == "Dump") && 
-                (row == transformWeatherMeleeSlot || row == transformWeatherRangedSlot || row == transformWeatherSeigeSlot ||
-                row == opponentTransformWeatherMeleeSlot || row == opponentTransformWeatherRangedSlot || row == opponentTransformWeatherSeigeSlot))
+            if(!playerHasPerformedAction) return true;
+            else 
             {
-                ActiveCard(cardObject, row);
-            }
-            if (type[0] == "Increase" && (row == transformSpecialCardSlot || row == opponentTransformSpecialCardSlot))
+                playerHasPerformedAction = false;
+                return false;
+            } 
+        }
+
+        public bool OpponentHasEarningActions()
+        {
+            if(!opponentHasPerformedAction) return true;
+            else 
             {
-                ActiveCard(cardObject, row);
+                opponentHasPerformedAction = false;
+                return false;
+            } 
+        }
+
+        public void CleanBoard()
+        {
+            CleanRow(transformMeleeRow, transformGraveyard);
+            CleanRow(transformRangedRow, transformGraveyard);
+            CleanRow(transformSeigeRow, transformGraveyard);
+
+            CleanRow(opponentTransformMeleeRow, opponentTransformGraveyard);
+            CleanRow(opponentTransformRangedRow, opponentTransformGraveyard);
+            CleanRow(opponentTransformSeigeRow, opponentTransformGraveyard);
+
+            playerHasPerformedAction = false;
+            opponentHasPerformedAction = false;
+        }
+
+        private void CleanRow(Transform row, Transform graveyard)
+        {
+            DisplayCard[] cardsToGraveyard = row.GetComponentsInChildren<DisplayCard>();
+
+            foreach(DisplayCard c in cardsToGraveyard)
+            {
+                c.transform.SetParent(graveyard);
+                c.transform.localPosition = Vector3.zero;
+                c.transform.localRotation = Quaternion.identity;
+                c.transform.localScale = Vector3.one;
             }
         }
     }
-}

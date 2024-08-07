@@ -26,4 +26,5 @@ public abstract class Card : ScriptableObject
     public bool HasBeenMulligan  {get; set;} = false;
 
     public abstract string[] GetKind();
+    public abstract int GetPower();
 }
