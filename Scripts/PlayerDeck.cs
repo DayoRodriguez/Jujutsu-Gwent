@@ -85,7 +85,7 @@ public class PlayerDeck : MonoBehaviour
             int counter = Random.Range(0,CardDataBase.cardData.Count);
             Card auxCard = CardDataBase.cardData[counter];                       
             if(!auxCard.isLider && (auxCard.faction.ToLower().Equals(cardLider.faction.ToLower()) 
-            || auxCard.faction.ToLower().Equals("neutral")) && !auxCard.name.Contains("Token"))
+            || auxCard.faction.ToLower().Equals("neutral")))
             {
                 if(!deck.Contains(auxCard))
                 {
@@ -269,7 +269,7 @@ public class PlayerDeck : MonoBehaviour
 
     }
 
-    private DisplayCard[] RemovedCardFromArray(DisplayCard[] array, int index)
+    public DisplayCard[] RemovedCardFromArray(DisplayCard[] array, int index)
     {
         List<DisplayCard> list = new List<DisplayCard>(array);
         list.RemoveAt(index);

@@ -1,7 +1,8 @@
     using System.Collections;
     using System.Collections.Generic;
+    using Unity.VisualScripting;
     using UnityEngine;
-
+    using System;
     public class BoardManager : MonoBehaviour
     {
         public Transform transformMeleeRow;
@@ -35,7 +36,12 @@
         public Transform opponentSelectedRow;
         public GameObject opponentSelectedCard;
 
+        public Transform effectSelectedRow;
+        public GameObject effectSelectedCard;
+
         public GameManager gameManager;
+
+        public CardEffects effectCard; 
 
         private bool playerHasPerformedAction = false;
         private bool opponentHasPerformedAction = false;
@@ -43,6 +49,7 @@
         void Start()
         {
             gameManager = FindObjectOfType<GameManager>();
+            effectCard = FindObjectOfType<CardEffects>();
         }
 
         public void ActiveCard(GameObject card, Transform row)
@@ -52,6 +59,7 @@
             card.transform.localRotation = Quaternion.identity;
             card.transform.localScale = Vector3.one;
             DisplayCard cardD = card.GetComponent<DisplayCard>();
+            
             if(cardD.card.owner == Card.Owner.Player)
             {
                 playerHasPerformedAction = true;
@@ -60,6 +68,11 @@
             {
                 opponentHasPerformedAction = true;
             }
+            
+            if(effectCard != null) effectCard.SetActivingCard(card);
+            else Debug.Log("La carta no se ha podido guardar");
+            effectCard.selectedRow = SelectionRow();
+                       
         }
 
         private void OnEnable()
@@ -186,7 +199,12 @@
                     (types[1] == "R" && row == opponentTransformRangedRow) ||
                     (types[2] == "S" && row == opponentTransformSeigeRow))
                 {
-                    ActiveCard(cardObject, row);
+                    //Verificamos que la carta no sea Mahoraga ya que esta solo puede ser invcada por su ritual
+                    DisplayCard aux = cardObject.GetComponent<DisplayCard>();
+                    if(!aux.card.name.Equals("Divine General Mahoraga"))
+                    {    
+                        ActiveCard(cardObject, row);
+                    }
                 }
             }
             else
@@ -196,7 +214,10 @@
                     (row == transformWeatherMeleeSlot || row == transformWeatherRangedSlot || row == transformWeatherSeigeSlot ||
                     row == opponentTransformWeatherMeleeSlot || row == opponentTransformWeatherRangedSlot || row == opponentTransformWeatherSeigeSlot))
                 {
-                    ActiveCard(cardObject, row);
+                    if(row.childCount == 0)
+                    {   
+                       ActiveCard(cardObject, row);
+                    }
                 }
                 if (type[0] == "Increase" && (row == transformSpecialCardSlot || row == opponentTransformSpecialCardSlot))
                 {
@@ -230,16 +251,24 @@
             CleanRow(transformMeleeRow, transformGraveyard);
             CleanRow(transformRangedRow, transformGraveyard);
             CleanRow(transformSeigeRow, transformGraveyard);
+            CleanRow(transformSpecialCardSlot, transformGraveyard);
+            CleanRow(transformWeatherMeleeSlot, transformGraveyard);
+            CleanRow(transformWeatherRangedSlot, transformGraveyard);
+            CleanRow(transformWeatherSeigeSlot, transformGraveyard);
 
             CleanRow(opponentTransformMeleeRow, opponentTransformGraveyard);
             CleanRow(opponentTransformRangedRow, opponentTransformGraveyard);
             CleanRow(opponentTransformSeigeRow, opponentTransformGraveyard);
+            CleanRow(opponentTransformSpecialCardSlot, opponentTransformGraveyard);
+            CleanRow(opponentTransformWeatherMeleeSlot, opponentTransformGraveyard);
+            CleanRow(opponentTransformWeatherRangedSlot, opponentTransformGraveyard);
+            CleanRow(opponentTransformWeatherSeigeSlot, opponentTransformGraveyard);
 
             playerHasPerformedAction = false;
             opponentHasPerformedAction = false;
         }
 
-        private void CleanRow(Transform row, Transform graveyard)
+        public void CleanRow(Transform row, Transform graveyard)
         {
             DisplayCard[] cardsToGraveyard = row.GetComponentsInChildren<DisplayCard>();
 
@@ -250,5 +279,136 @@
                 c.transform.localRotation = Quaternion.identity;
                 c.transform.localScale = Vector3.one;
             }
+        }
+
+        public void SelectObject(GameObject clicObject)
+        {
+            DisplayCard cardComponent = clicObject.GetComponent<DisplayCard>();
+            RowClickHandler clicRow  = clicObject.GetComponent<RowClickHandler>();
+
+            if(cardComponent != null)
+            {
+                effectSelectedCard = clicObject;
+            }
+            else if(clicRow.rowType == RowClickHandler.RowType.Melee 
+                    || clicRow.rowType == RowClickHandler.RowType.Ranged 
+                    || clicRow.rowType == RowClickHandler.RowType.Siege)
+            {
+                if(clicRow != null)
+                {
+                    effectSelectedRow.AddComponent<RowClickHandler>();
+                    //effectSelectedRow.rowType = clicRow.rowType;
+                }    
+                effectSelectedRow = clicObject.transform;
+            }
+        }
+
+        public Transform SelectionRow()
+        {
+            effectSelectedRow = null;
+            opponentSelectedRow = null;
+            selectedRow = null;
+
+            while(effectSelectedRow == null)
+            {
+                Debug.Log("Selecciona una fila para activar el efecto");
+                if(selectedRow != null)
+                {
+                    effectSelectedRow = selectedRow;
+                }
+                else if(opponentSelectedRow != null)
+                {
+                    effectSelectedRow = opponentSelectedRow;
+                }
+            }
+            return effectSelectedRow;
+        }
+
+        public GameObject SelectionCard()
+        {
+            effectSelectedCard = null;
+            opponentSelectedCard = null;
+            selectedCard = null;
+
+            while(effectSelectedCard == null)
+            {
+                Debug.Log("Selecciona una fila para activar el efecto");
+                if(selectedCard != null)
+                {
+                    effectSelectedCard = selectedCard;
+                }
+                else if(opponentSelectedCard != null)
+                {
+                    effectSelectedCard = opponentSelectedCard;
+                }
+            }
+            return effectSelectedCard;
+        }    
+
+        //===========================================================================
+
+        public void SelectionRowIfNeeded(Action<Transform> effectAction)
+        {
+            if(effectCard != null && effectCard.NeedsRowSelection())
+            {
+                effectSelectedRow = null;
+                Debug.Log("Selecciona una fila para seguir con el efecto");
+
+                StartCoroutine(WaitForRowSelection(() =>
+                {
+                    if(effectSelectedRow != null)
+                    {
+                        effectAction(effectSelectedRow);
+                    }
+                    else Debug.LogWarning("No se ha seleccionado ninguna fila.");
+                }));
+            }
+            else 
+            {
+                effectAction(null);
+            }
+        }
+
+        public void SelectionCardIfNeeded(Action<GameObject> effectAction)
+        {
+            if (effectCard != null && effectCard.NeedsCardSelection())
+            {
+                effectSelectedCard = null;
+                Debug.Log("Selecciona una carta para activar el efecto.");
+
+                StartCoroutine(WaitForCardSelection(() =>
+                {
+                    if (effectSelectedCard != null)
+                    {
+                        effectAction(effectSelectedCard);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("No se ha seleccionado ninguna carta.");
+                    }
+                }));
+            }
+            else
+            {
+                effectAction(null); // Si no es necesario seleccionar una carta
+            }
+        }
+
+        private IEnumerator WaitForRowSelection(Action callback)
+        {
+            while (effectSelectedRow == null)
+            {
+                yield return null; // Espera hasta que se seleccione una fila
+            }
+            callback();
+        }
+
+        private IEnumerator WaitForCardSelection(Action callback)
+        {
+            while (effectSelectedCard == null)
+            {
+                yield return null; // Espera hasta que se seleccione una carta
+            }
+            callback();
         }
     }

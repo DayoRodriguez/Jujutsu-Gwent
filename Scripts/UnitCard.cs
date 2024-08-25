@@ -12,6 +12,8 @@ public class UnitCard : Card
     public string kindAttack2;
     public string kindAttack3;
 
+    public static int Power{set; get;}
+
     public UnitCard()
     {
 

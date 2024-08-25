@@ -21,10 +21,23 @@ public abstract class Card : ScriptableObject
     {
         Player, Opponent
     }
+    public enum CardEffect
+    {
+        ChangeAttack, SpecialSummon, Active, Destroy, Draw, TakeControl, Add
+    }
+    public CardEffect cardEffects;
     public Owner owner;
     public bool IsSelected {get; set;} = false;
     public bool HasBeenMulligan  {get; set;} = false;
 
     public abstract string[] GetKind();
     public abstract int GetPower();
+
+    public void SetAttack(int n)
+    {
+        if(isUnit)
+        {
+            UnitCard.Power = n;
+        }
+    }
 }
