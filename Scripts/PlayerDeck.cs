@@ -26,10 +26,12 @@ public class PlayerDeck : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        DeckCreator("Magician", deck, ref playerLeaderInstantiated, LeaderCard);
+        DeckCreator(FactionSelection.Instance.playerFactionDeck, deck, ref playerLeaderInstantiated, LeaderCard);
+        //DeckCreator("Magician", deck, ref playerLeaderInstantiated, LeaderCard);
         InstantiateDeck(deck, playerDeck); 
 
-        DeckCreator("Curse", opponentDeck, ref opponentLeaderInstantiated, OpponentLeaderCard);  
+        DeckCreator(FactionSelection.Instance.opponentFactionDeck, opponentDeck, ref opponentLeaderInstantiated, OpponentLeaderCard);
+        //DeckCreator("Curse", opponentDeck, ref opponentLeaderInstantiated, OpponentLeaderCard);  
         InstantiateDeck(opponentDeck, OpponentPlayerDeck);
 
         // FirstDraw(PlayerHand,playerDeck);
