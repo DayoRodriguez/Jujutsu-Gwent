@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 2
   name: Yuuta Okkotsu
-  effect: Target a card in your field and if is possible summon a copy from your
-    deck
+  effect: SummonCopy
   faction: Magician
   spriteImage: {fileID: 21300000, guid: e2c54016029ea2a4085af4e9e9d0f745, type: 3}
   IsActivated: 0

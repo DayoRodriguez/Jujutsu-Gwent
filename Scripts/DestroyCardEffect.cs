@@ -12,25 +12,31 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
     public void Execute(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        cardEffect = FindObjectOfType<CardEffects>();
+        Initialize();
+        //cardEffect = FindObjectOfType<CardEffects>();
 
-        auxCard = cardEffect.activingCard;
+        //auxCard = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
             case "DespliegueDominio" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 DespliegueDominio(activingCard);
                 break;
             case "DestroyMaxAttack" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 DestroyMaxAttack(activingCard);
                 break;    
             case "DestroyLessAttack" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 DestroyLessAttack(activingCard);
                 break;  
             case "MaxPowerOut" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 MaxPowerOut();
                 break;
             case "GreatVoid" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 GreatVoid(activingCard);
                 break;        
             default :
@@ -38,9 +44,9 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
         }
     }
 
-    public void Initialize(Card card)
+    public void Initialize()
     {
-
+        board = FindObjectOfType<BoardManager>();
     }
 
     public void ShowMessagePanel(string sms)
@@ -66,7 +72,7 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
     }
 
     //Despliegue de Dominio's effect
-    public void DespliegueDominio(GameObject activingCard)
+    public IEnumerator DespliegueDominio(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
 
@@ -75,11 +81,18 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
             if(ThereIs(board.transformWeatherMeleeSlot) || ThereIs(board.transformWeatherRangedSlot) || ThereIs(board.transformWeatherSeigeSlot)
             || ThereIs(board.opponentTransformWeatherMeleeSlot) || ThereIs(board.opponentTransformWeatherRangedSlot) || ThereIs(board.opponentTransformWeatherSeigeSlot))
             {
-                auxCard = board.SelectionCard();
-                if(auxCard != null)
-                {
-                    DestroyCard(auxCard);
-                }
+                yield return board.WaitForSelection<GameObject>
+                (
+                    selectedCard => 
+                    {
+                        auxCard = selectedCard;
+                        if(auxCard != null)
+                        {
+                            DestroyCard(auxCard);
+                        }
+                    },
+                    () => board.effectSelectedCard == null
+                );
             }
         //}
         // else

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 18
   name: Kechizu
-  effect: Return a card from your field to your hand and  summon a token with 0 attack
+  effect: ReturnCard
   faction: Curse
   spriteImage: {fileID: 21300000, guid: 84bb58d6ab7eccf489384c41ce617477, type: 3}
   IsActivated: 0

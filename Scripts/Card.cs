@@ -12,7 +12,7 @@ public abstract class Card : ScriptableObject
     public string effect;
     public string faction;
     public Sprite spriteImage;
-    public bool IsActivated;
+    public bool isActivated;
     public bool isLider;
     public Sprite cardBack;
     public bool isSpecial;

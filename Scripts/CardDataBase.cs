@@ -36,6 +36,7 @@ public class CardDataBase : MonoBehaviour
     string cardFolder = "Cards";
     public static List<Card> cardData = new List<Card>();
     public static List<Card> tokenData = new List<Card>();
+    public static List<Card> leaderData = new List<Card>();
     void Awake()
     {
         LoadCard();
@@ -46,7 +47,11 @@ public class CardDataBase : MonoBehaviour
         Card[] cards = Resources.LoadAll<Card>(cardFolder);
         foreach(Card card in cards)
         {
-            if(!card.name.Contains("Token"))
+            if(card.isLider)
+            {
+                leaderData.Add(card);
+            }
+            else if(!card.name.Contains("Token"))
             {
                 cardData.Add(card);
                 Debug.Log("La carta ha sido cargada " + card.name);

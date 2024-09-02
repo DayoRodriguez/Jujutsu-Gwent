@@ -16,35 +16,48 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
 
     public void Execute(GameObject activingCard)
     {
+        Initialize();
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        cardEffect = FindObjectOfType<CardEffects>();
+        //cardEffect = FindObjectOfType<CardEffects>();
 
-        auxCard = cardEffect.activingCard;
+        //auxCard = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
-            case "SummonFromGraveyard" :
+            case "SummonFromGraveyard":
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 SummonFromGraveyard();
+                EndEffect(activingCard);
                 break;
             case "SummonToken" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);        
                 SummonToken(activingCard, activingCard.transform.parent);
+                EndEffect(activingCard);
                 break;    
             case "ShadowGarden" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ShadowGarden(activingCard);
+                EndEffect(activingCard);
                 break;
             case "ReturnCard" :
-                auxCard = board.SelectionCard();
-                ReturnCard(activingCard, auxCard);
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
+                ReturnCard(activingCard);
+                EndEffect(activingCard);
                 break;
             case "Ritual" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 Ritual(activingCard);
+                EndEffect(activingCard);
                 break;
             case "SummonCopy" :    
-                auxCard = board.SelectionCard();
-                SummonCopy(activingCard, auxCard);
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
+                SummonCopy(activingCard);
+                EndEffect(activingCard);
                 break;
             case "Saltamontes":
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 Saltamontes(activingCard);
+                EndEffect(activingCard);
                 break;
             default :
                 break;        
@@ -52,9 +65,11 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         }
     }
 
-    public void Initialize(Card card)
+    public void Initialize()
     {
-        activingCard = card;
+        //cardSelectionPanel = GameObject.Find("cardSelectionPanel");
+        //cardListContainer = GameObject.Find("cardListContainer").GetComponent<Transform>();
+        board = FindObjectOfType<BoardManager>();
     }
 
     public void ShowMessagePanel(string sms)
@@ -121,7 +136,7 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         if(tokenCard != null)
         {
             tokenCard.card = tokenCardToSummon;
-            tokenCard.card.IsActivated = true;
+            tokenCard.card.isActivated = true;
             tokenCard.SetUp(tokenCard.card);
         }
         if(tokenCard.gameObject.GetComponent<CardLogic>() == null)
@@ -206,25 +221,32 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
     }
 
     //Kechizu
-    public void ReturnCard(GameObject activingCard, GameObject targedCard)
+    public IEnumerator ReturnCard(GameObject activingCard)
     {
-        DisplayCard activingAux = activingCard.GetComponent<DisplayCard>();
-        DisplayCard targedAux = targedCard.GetComponent<DisplayCard>();
-
-        if(activingAux.card.owner == targedAux.card.owner)
-        {
-            SummonToken(targedCard, targedCard.transform.parent);
-
-            DisplayCard[] tokensInRow = targedCard.transform.parent.GetComponents<DisplayCard>();
-            DisplayCard lastToken = tokensInRow[tokensInRow.Length - 1];
-
-            if(lastToken != null)
+        yield return board.WaitForSelection<GameObject>
+        (
+            selectedCard =>
             {
-                lastToken.card.SetAttack(0);
-            }
+                DisplayCard activingAux = activingCard.GetComponent<DisplayCard>();
+                DisplayCard targedAux = selectedCard.GetComponent<DisplayCard>();
 
-            targedCard.transform.SetParent(board.transformPlayerHand);
-        }
+                if(activingAux.card.owner == targedAux.card.owner)
+                {
+                    SummonToken(selectedCard, selectedCard.transform.parent);
+
+                    DisplayCard[] tokensInRow = selectedCard.transform.parent.GetComponents<DisplayCard>();
+                    DisplayCard lastToken = tokensInRow[tokensInRow.Length - 1];
+
+                    if(lastToken != null)
+                    {
+                    lastToken.card.SetAttack(0);
+                    }
+
+                    selectedCard.transform.SetParent(board.transformPlayerHand);
+                }
+            },
+            () => board.effectSelectedCard == null
+        );     
     }
 
     //Mahoraga's Ritual effect
@@ -266,49 +288,56 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
     }
 
     //Yuuta Okkotsu's effect
-    public void SummonCopy(GameObject activingCard, GameObject targedCard)
+    public IEnumerator SummonCopy(GameObject activingCard)
     {
-        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        DisplayCard targedC = targedCard.GetComponent<DisplayCard>();
-        DisplayCard cardToSummon;
-        DisplayCard[] cardsInDeck;
-        DisplayCard[] cardsInHand;
-
-        if(!targedC.card.isSpecial)
-        {
-            if(activingC.card.owner == Card.Owner.Player)
+        yield return board.WaitForSelection<GameObject>
+        (
+            selectedCard =>
             {
-                cardsInDeck = board.transformDeck.GetComponents<DisplayCard>();
-                cardsInHand = board.transformPlayerHand.GetComponents<DisplayCard>();
+                DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
+                DisplayCard targedC = selectedCard.GetComponent<DisplayCard>();
+                DisplayCard cardToSummon;
+                DisplayCard[] cardsInDeck;
+                DisplayCard[] cardsInHand;
 
-                if(IsThere(cardsInDeck, targedC))
+                if(!targedC.card.isSpecial)
                 {
-                    cardToSummon = targedC;
-                    Summon(targedCard, targedCard.transform.parent);
-                }
-                else if(IsThere(cardsInHand, targedC))
-                {
-                    cardToSummon = targedC;
-                    Summon(targedCard, targedCard.transform.parent);
-                }
-            }
-            else 
-            {
-                cardsInDeck = board.opponentTransformDeck.GetComponents<DisplayCard>();
-                cardsInHand = board.opponentTransformPlayerHand.GetComponents<DisplayCard>();
+                    if(activingC.card.owner == Card.Owner.Player)
+                    {
+                        cardsInDeck = board.transformDeck.GetComponents<DisplayCard>();
+                        cardsInHand = board.transformPlayerHand.GetComponents<DisplayCard>();
 
-                if(IsThere(cardsInDeck, targedC))
-                {
-                    cardToSummon = targedC;
-                    Summon(targedCard, targedCard.transform.parent);
+                        if(IsThere(cardsInDeck, targedC))
+                        {
+                            cardToSummon = targedC;
+                            Summon(selectedCard, selectedCard.transform.parent);
+                        }
+                        else if(IsThere(cardsInHand, targedC))
+                        {
+                            cardToSummon = targedC;
+                            Summon(selectedCard, selectedCard.transform.parent);
+                        }
+                    }
+                    else 
+                    {
+                        cardsInDeck = board.opponentTransformDeck.GetComponents<DisplayCard>();
+                        cardsInHand = board.opponentTransformPlayerHand.GetComponents<DisplayCard>();
+
+                        if(IsThere(cardsInDeck, targedC))
+                        {
+                            cardToSummon = targedC;
+                            Summon(selectedCard, selectedCard.transform.parent);
+                        }
+                        else if(IsThere(cardsInHand, targedC))
+                        {
+                            cardToSummon = targedC;
+                            Summon(selectedCard, selectedCard.transform.parent);
+                        }
+                    }
                 }
-                else if(IsThere(cardsInHand, targedC))
-                {
-                    cardToSummon = targedC;
-                    Summon(targedCard, targedCard.transform.parent);
-                }
-            }
-        }
+            },
+            () => board.effectSelectedCard == null
+        );     
     }
 
     //Saltamontes' curse's effect
@@ -422,7 +451,7 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         DisplayCard cardToSummon = card.GetComponent<DisplayCard>();
         if (cardToSummon != null)
         {
-            cardToSummon.card.IsActivated = true;
+            cardToSummon.card.isActivated = true;
             cardToSummon.SetUp(cardToSummon.card);
         }
     }

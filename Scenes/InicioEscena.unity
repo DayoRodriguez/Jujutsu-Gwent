@@ -287,7 +287,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: ab107c6cf160e9b45a7db724b49cd0f7, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -807,6 +807,7 @@ MonoBehaviour:
   StartButton: {fileID: 679693358}
   SelectionFactionPanel: {fileID: 1934925925}
   SelectionFactionText: {fileID: 1809466909}
+  startImage: {fileID: 264929634}
 --- !u!1 &1123522777
 GameObject:
   m_ObjectHideFlags: 0
@@ -934,6 +935,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83ff7d189519d234db88ffd74b746fe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerFactionDeck: 
+  opponentFactionDeck: 
   MagicianButton: {fileID: 1939262516}
   CurseButton: {fileID: 1881624790}
   SelectionFactionPanel: {fileID: 1934925925}
@@ -969,7 +972,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1208,7 +1211,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

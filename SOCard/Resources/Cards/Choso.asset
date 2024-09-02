@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 8
   name: Choso
-  effect: Activate an increase card from your deck
+  effect: ActiveIncrease
   faction: Curse
   spriteImage: {fileID: 21300000, guid: a3f07125f58feb44698026a2879869a6, type: 3}
   IsActivated: 0

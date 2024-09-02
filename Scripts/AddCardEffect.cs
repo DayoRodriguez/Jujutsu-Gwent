@@ -18,14 +18,16 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
 
     public void Execute(GameObject activingCard)
     {   
+        Initialize();
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        cardEffect = FindObjectOfType<CardEffects>();
+        //cardEffect = FindObjectOfType<CardEffects>();
 
-        card = cardEffect.activingCard;
+        //card = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
             case "AddSpecialCard" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 if(activingC.card.owner == Card.Owner.Player)
                 {
                     AddSpecialCard(board.transformDeck, board.transformPlayerHand);
@@ -36,6 +38,7 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
                 }
                 break;
             case "AddSpecialCardDeck" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 if(activingC.card.owner == Card.Owner.Player)
                 {
                     AddSpecialCardDeck(board.transformDeck, board.transformPlayerHand);
@@ -50,9 +53,11 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
         }
     }
 
-    public void Initialize(Card card)
+    public void Initialize()
     {
-
+        //cardSelectionPanel = GameObject.Find("cardSelectionPanel");
+        //cardListContainer = GameObject.Find("cardListContainer").GetComponent<Transform>();
+        board = FindObjectOfType<BoardManager>();
     }
 
     public void ShowMessagePanel(string sms)
@@ -123,7 +128,7 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
             cardToMove.gameObject.AddComponent<CardLogic>();
         }
 
-        cardToMove.card.IsActivated = true;
+        cardToMove.card.isActivated = true;
         cardToMove.SetUp(cardToMove.card);
 
         cardToMove.transform.SetParent(destination);
@@ -188,7 +193,7 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
         selectedCard.transform.localPosition = Vector3.zero;
         selectedCard.transform.localScale = Vector3.one;
         selectedCard.transform.localRotation = Quaternion.identity;
-        selectedCard.card.IsActivated = true;
+        selectedCard.card.isActivated = true;
         selectedCard.SetUp(selectedCard.card);
     }
 

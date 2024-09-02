@@ -55,9 +55,9 @@
         public void ActiveCard(GameObject card, Transform row)
         {
             card.transform.SetParent(row);
-            card.transform.localPosition = Vector3.zero;
-            card.transform.localRotation = Quaternion.identity;
-            card.transform.localScale = Vector3.one;
+            ResetCardTransform(card);
+
+            
             DisplayCard cardD = card.GetComponent<DisplayCard>();
             
             if(cardD.card.owner == Card.Owner.Player)
@@ -69,9 +69,8 @@
                 opponentHasPerformedAction = true;
             }
             
-            if(effectCard != null) effectCard.SetActivingCard(card);
-            else Debug.Log("La carta no se ha podido guardar");
-            effectCard.selectedRow = SelectionRow();
+            effectCard?.SetActivingCard(card);
+            effectCard.Excute(card);
                        
         }
 
@@ -87,101 +86,23 @@
 
         private void HandlerRowClicked(RowClickHandler.RowType rowType)
         {
-            switch (rowType)
-                {
-                    case RowClickHandler.RowType.Melee:
-                        selectedRow = transformMeleeRow;
-                        break;
-                    case RowClickHandler.RowType.Ranged:
-                        selectedRow = transformRangedRow;
-                        break;
-                    case RowClickHandler.RowType.Siege:
-                        selectedRow = transformSeigeRow;
-                        break;
-                    case RowClickHandler.RowType.Special:
-                        selectedRow = transformSpecialCardSlot;
-                        break;
-                    case RowClickHandler.RowType.WeatherMelee:
-                        selectedRow = transformWeatherMeleeSlot;
-                        break;
-                    case RowClickHandler.RowType.WeatherRanged:
-                        selectedRow = transformWeatherRangedSlot;
-                        break;
-                    case RowClickHandler.RowType.WeatherSiege:
-                        selectedRow = transformWeatherSeigeSlot;
-                        break;
-                    case RowClickHandler.RowType.Leader:
-                        selectedRow = transformLeaderCardSlot;
-                        break;
-                    case RowClickHandler.RowType.Deck:
-                        selectedRow = transformDeck;
-                        break;
-                    case RowClickHandler.RowType.Hand:
-                        selectedRow = transformPlayerHand;
-                        break;
-                    case RowClickHandler.RowType.Graveyard:
-                        selectedRow = transformGraveyard;
-                        break;
-                    case RowClickHandler.RowType.OpponentMelee:
-                        opponentSelectedRow = opponentTransformMeleeRow;
-                        break;
-                    case RowClickHandler.RowType.OpponentRanged:
-                        opponentSelectedRow = opponentTransformRangedRow;
-                        break;
-                    case RowClickHandler.RowType.OpponentSiege:
-                        opponentSelectedRow = opponentTransformSeigeRow;
-                        break;
-                    case RowClickHandler.RowType.OpponentSpecial:
-                        opponentSelectedRow = opponentTransformSpecialCardSlot;
-                        break;
-                    case RowClickHandler.RowType.OpponentWeatherMelee:
-                        opponentSelectedRow = opponentTransformWeatherMeleeSlot;
-                        break;
-                    case RowClickHandler.RowType.OpponentWeatherRanged:
-                        opponentSelectedRow = opponentTransformWeatherRangedSlot;
-                        break;
-                    case RowClickHandler.RowType.OpponentWeatherSiege:
-                        opponentSelectedRow = opponentTransformWeatherSeigeSlot;
-                        break;
-                    case RowClickHandler.RowType.OpponentLeader:
-                        opponentSelectedRow = opponentTransformLeaderCardSlot;
-                        break;
-                    case RowClickHandler.RowType.OpponentDeck:
-                        opponentSelectedRow = opponentTransformDeck;
-                        break;
-                    case RowClickHandler.RowType.OpponentHand:
-                        opponentSelectedRow = opponentTransformPlayerHand;
-                        break;
-                    case RowClickHandler.RowType.OpponentGraveyard:
-                        opponentSelectedRow = opponentTransformGraveyard;
-                        break;    
-                    default:
-                        selectedRow = null;
-                        opponentSelectedRow = null;
-                        break;
-            }
-            if(gameManager.actualState == GameManager.GameState.PlayerTurn)
+            selectedRow = GetRowFromType(rowType);
+            opponentSelectedRow = GetRowFromType(rowType);
+
+            if (gameManager.actualState == GameManager.GameState.PlayerTurn && selectedCard != null && selectedRow != null)
             {
-                if(selectedCard != null && selectedRow != null)
+                if (IsCardInPlayerHand(selectedCard))
                 {
-                    if(selectedCard.transform.parent == transformPlayerHand)
-                    {
-                        HandleCardActivation(selectedCard, selectedRow);
-                        selectedCard = null;
-                        selectedRow = null;
-                    }
+                    HandleCardActivation(selectedCard, selectedRow);
+                    ClearSelections();
                 }
             }
-            else if(gameManager.actualState == GameManager.GameState.OpponentTurn)
+            else if (gameManager.actualState == GameManager.GameState.OpponentTurn && opponentSelectedCard != null && opponentSelectedRow != null)
             {
-                if(opponentSelectedCard != null && opponentSelectedRow != null)
+                if (IsCardInOpponentHand(opponentSelectedCard))
                 {
-                    if(opponentSelectedCard.transform.parent == opponentTransformPlayerHand)
-                    {
-                        HandleCardActivation(opponentSelectedCard, opponentSelectedRow);
-                        opponentSelectedCard = null;
-                        opponentSelectedRow = null;   
-                    }                
+                    HandleCardActivation(opponentSelectedCard, opponentSelectedRow);
+                    ClearSelections();
                 }
             }
         }
@@ -189,40 +110,19 @@
         public void HandleCardActivation(GameObject cardObject, Transform row)
         {
             Card card = cardObject.GetComponent<DisplayCard>().card;
-            if (card.isUnit)
+            string[] types = card.GetKind();
+
+            if (card.isUnit && IsValidUnitRow(types, row))
             {
-                string[] types = card.GetKind();
-                if ((types[0] == "M" && row == transformMeleeRow) ||
-                    (types[1] == "R" && row == transformRangedRow) ||
-                    (types[2] == "S" && row == transformSeigeRow) ||
-                    (types[0] == "M" && row == opponentTransformMeleeRow) ||
-                    (types[1] == "R" && row == opponentTransformRangedRow) ||
-                    (types[2] == "S" && row == opponentTransformSeigeRow))
+                
+                if (!IsMahoragaCard(cardObject))
                 {
-                    //Verificamos que la carta no sea Mahoraga ya que esta solo puede ser invcada por su ritual
-                    DisplayCard aux = cardObject.GetComponent<DisplayCard>();
-                    if(!aux.card.name.Equals("Divine General Mahoraga"))
-                    {    
-                        ActiveCard(cardObject, row);
-                    }
+                    ActiveCard(cardObject, row);    
                 }
             }
-            else
-            {
-                string[] type = card.GetKind();
-                if ((type[0] == "Climate" || type[0] == "Dump") && 
-                    (row == transformWeatherMeleeSlot || row == transformWeatherRangedSlot || row == transformWeatherSeigeSlot ||
-                    row == opponentTransformWeatherMeleeSlot || row == opponentTransformWeatherRangedSlot || row == opponentTransformWeatherSeigeSlot))
-                {
-                    if(row.childCount == 0)
-                    {   
-                       ActiveCard(cardObject, row);
-                    }
-                }
-                if (type[0] == "Increase" && (row == transformSpecialCardSlot || row == opponentTransformSpecialCardSlot))
-                {
-                    ActiveCard(cardObject, row);
-                }
+            else if(IsValidSpecialRow(card, row))
+            {                      
+               ActiveCard(cardObject, row);
             }
         }
 
@@ -281,134 +181,162 @@
             }
         }
 
-        public void SelectObject(GameObject clicObject)
+        //================Nuevos Codigos Optimizados=========================================
+        private bool IsValidUnitRow(string[] types, Transform row)
         {
-            DisplayCard cardComponent = clicObject.GetComponent<DisplayCard>();
-            RowClickHandler clicRow  = clicObject.GetComponent<RowClickHandler>();
-
-            if(cardComponent != null)
-            {
-                effectSelectedCard = clicObject;
-            }
-            else if(clicRow.rowType == RowClickHandler.RowType.Melee 
-                    || clicRow.rowType == RowClickHandler.RowType.Ranged 
-                    || clicRow.rowType == RowClickHandler.RowType.Siege)
-            {
-                if(clicRow != null)
-                {
-                    effectSelectedRow.AddComponent<RowClickHandler>();
-                    //effectSelectedRow.rowType = clicRow.rowType;
-                }    
-                effectSelectedRow = clicObject.transform;
-            }
+            return  (types[0] == "M" && row == transformMeleeRow) ||
+                    (types[1] == "R" && row == transformRangedRow) ||
+                    (types[2] == "S" && row == transformSeigeRow) ||
+                    (types[0] == "M" && row == opponentTransformMeleeRow) ||
+                    (types[1] == "R" && row == opponentTransformRangedRow) ||
+                    (types[2] == "S" && row == opponentTransformSeigeRow);
         }
-
-        public Transform SelectionRow()
+        
+        private bool IsValidSpecialRow(Card card, Transform row)
         {
-            effectSelectedRow = null;
-            opponentSelectedRow = null;
-            selectedRow = null;
-
-            while(effectSelectedRow == null)
+            string[] type = card.GetKind();
+            if ((type[0] == "Climate" || type[0] == "Dump") && IsValidWeatherRow(row))
             {
-                Debug.Log("Selecciona una fila para activar el efecto");
-                if(selectedRow != null)
-                {
-                    effectSelectedRow = selectedRow;
-                }
-                else if(opponentSelectedRow != null)
-                {
-                    effectSelectedRow = opponentSelectedRow;
-                }
+                return row.childCount == 0;
             }
-            return effectSelectedRow;
+            return type[0] == "Increase" && IsSpecialSlot(row);
         }
-
-        public GameObject SelectionCard()
-        {
-            effectSelectedCard = null;
-            opponentSelectedCard = null;
-            selectedCard = null;
-
-            while(effectSelectedCard == null)
-            {
-                Debug.Log("Selecciona una fila para activar el efecto");
-                if(selectedCard != null)
-                {
-                    effectSelectedCard = selectedCard;
-                }
-                else if(opponentSelectedCard != null)
-                {
-                    effectSelectedCard = opponentSelectedCard;
-                }
-            }
-            return effectSelectedCard;
-        }    
-
-        //===========================================================================
-
+        
+        private bool IsValidWeatherRow(Transform row) =>
+        row == transformWeatherMeleeSlot || row == transformWeatherRangedSlot || row == transformWeatherSeigeSlot ||
+        row == opponentTransformWeatherMeleeSlot || row == opponentTransformWeatherRangedSlot || row == opponentTransformWeatherSeigeSlot;
+        
+        private bool IsSpecialSlot(Transform row) => row ==transformSpecialCardSlot || row == opponentTransformSpecialCardSlot;
         public void SelectionRowIfNeeded(Action<Transform> effectAction)
         {
-            if(effectCard != null && effectCard.NeedsRowSelection())
-            {
-                effectSelectedRow = null;
-                Debug.Log("Selecciona una fila para seguir con el efecto");
-
-                StartCoroutine(WaitForRowSelection(() =>
-                {
-                    if(effectSelectedRow != null)
-                    {
-                        effectAction(effectSelectedRow);
-                    }
-                    else Debug.LogWarning("No se ha seleccionado ninguna fila.");
-                }));
-            }
-            else 
-            {
-                effectAction(null);
-            }
+            StartCoroutine(WaitForSelection<Transform>(effectSelectedRow => effectAction(effectSelectedRow), () => effectSelectedRow == null));
         }
 
         public void SelectionCardIfNeeded(Action<GameObject> effectAction)
         {
-            if (effectCard != null && effectCard.NeedsCardSelection())
-            {
-                effectSelectedCard = null;
-                Debug.Log("Selecciona una carta para activar el efecto.");
+            StartCoroutine(WaitForSelection<GameObject>(effectSelectedCard => effectAction(effectSelectedCard), () => effectSelectedCard == null));
+        }
 
-                StartCoroutine(WaitForCardSelection(() =>
+        public IEnumerator WaitForSelection<T>(Action<T> effectAction, Func<bool> selectionNeeded)
+        {
+            while(selectionNeeded())
+            {
+                yield return null;
+            }
+            effectAction?.Invoke(default);
+        }
+        private void ResetCardTransform(GameObject card)
+        {
+            card.transform.localPosition = Vector3.zero;
+            card.transform.localRotation = Quaternion.identity;
+            card.transform.localScale = Vector3.one;
+        }
+
+        private bool IsCardInPlayerHand(GameObject card) => card.transform.parent == transformPlayerHand;
+        private bool IsCardInOpponentHand(GameObject card) => card.transform.parent == opponentTransformPlayerHand;
+        private bool IsMahoragaCard(GameObject cardObject)
+        {
+            DisplayCard aux = cardObject.GetComponent<DisplayCard>();
+            return aux.card.name.Equals("Divine General Mahoraga");
+        }
+
+        private void ClearSelections()
+        {
+            selectedCard = null;
+            selectedRow = null;
+            opponentSelectedCard = null;
+            opponentSelectedRow = null;
+        }
+
+        private Transform GetRowFromType(RowClickHandler.RowType rowType)
+        {
+            return rowType switch
+            {
+                RowClickHandler.RowType.Melee => transformMeleeRow,
+                RowClickHandler.RowType.Ranged => transformRangedRow,
+                RowClickHandler.RowType.Siege => transformSeigeRow,
+                RowClickHandler.RowType.Special => transformSpecialCardSlot,
+                RowClickHandler.RowType.WeatherMelee => transformWeatherMeleeSlot,
+                RowClickHandler.RowType.WeatherRanged => transformWeatherRangedSlot,
+                RowClickHandler.RowType.WeatherSiege => transformWeatherSeigeSlot,
+                RowClickHandler.RowType.Leader => transformLeaderCardSlot,
+                RowClickHandler.RowType.Deck => transformDeck,
+                RowClickHandler.RowType.Hand => transformPlayerHand,
+                RowClickHandler.RowType.Graveyard => transformGraveyard,
+                RowClickHandler.RowType.OpponentMelee => opponentTransformMeleeRow,
+                RowClickHandler.RowType.OpponentRanged => opponentTransformRangedRow,
+                RowClickHandler.RowType.OpponentSiege => opponentTransformSeigeRow,
+                RowClickHandler.RowType.OpponentSpecial => opponentTransformSpecialCardSlot,
+                RowClickHandler.RowType.OpponentWeatherMelee => opponentTransformWeatherMeleeSlot,
+                RowClickHandler.RowType.OpponentWeatherRanged => opponentTransformWeatherRangedSlot,
+                RowClickHandler.RowType.OpponentWeatherSiege => opponentTransformWeatherSeigeSlot,
+                RowClickHandler.RowType.OpponentLeader => opponentTransformLeaderCardSlot,
+                RowClickHandler.RowType.OpponentDeck => opponentTransformDeck,
+                RowClickHandler.RowType.OpponentHand => opponentTransformPlayerHand,
+                RowClickHandler.RowType.OpponentGraveyard => opponentTransformGraveyard,
+                _ => null,
+            };
+        }
+
+        public Transform GetPlayerRowForCard(DisplayCard card)
+        {
+            if (card.card.GetKind()[0] == "Climate")
+            {
+                // Verificamos cuál fila de clima está libre (sin hijos)
+                if (transformWeatherMeleeSlot.childCount == 0)
                 {
-                    if (effectSelectedCard != null)
-                    {
-                        effectAction(effectSelectedCard);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("No se ha seleccionado ninguna carta.");
-                    }
-                }));
+                    return transformWeatherMeleeSlot;
+                }
+                else if (transformWeatherRangedSlot.childCount == 0)
+                {
+                    return transformWeatherRangedSlot;
+                }
+                else if (transformWeatherSeigeSlot.childCount == 0)
+                {
+                    return transformWeatherSeigeSlot;
+                }
+                else return null;
             }
-            else
+            else if (card.card.GetKind()[0] == "Increase")
             {
-                effectAction(null); // Si no es necesario seleccionar una carta
+            // Verificamos si la fila especial de incrementos está libre (sin hijos)
+                if (transformSpecialCardSlot.childCount == 0)
+                {
+                    return transformSpecialCardSlot;
+                }
+                else return null;    
             }
+            else return null;
         }
 
-        private IEnumerator WaitForRowSelection(Action callback)
+        public Transform GetOpponentRowForCard(DisplayCard card)
         {
-            while (effectSelectedRow == null)
+            if (card.card.GetKind()[0] == "Climate")
             {
-                yield return null; // Espera hasta que se seleccione una fila
+                // Verificamos cuál fila de clima está libre (sin hijos)
+                if (opponentTransformWeatherMeleeSlot.childCount == 0)
+                {
+                    return opponentTransformWeatherMeleeSlot;
+                }
+                else if (opponentTransformWeatherRangedSlot.childCount == 0)
+                {
+                    return opponentTransformWeatherRangedSlot;
+                }
+                else if (opponentTransformWeatherSeigeSlot.childCount == 0)
+                {
+                    return opponentTransformWeatherSeigeSlot;
+                }
+                else return null;
             }
-            callback();
-        }
-
-        private IEnumerator WaitForCardSelection(Action callback)
-        {
-            while (effectSelectedCard == null)
+            else if (card.card.GetKind()[0] == "Increase")
             {
-                yield return null; // Espera hasta que se seleccione una carta
+            // Verificamos si la fila especial de incrementos está libre (sin hijos)
+                if (opponentTransformSpecialCardSlot.childCount == 0)
+                {
+                    return opponentTransformSpecialCardSlot;
+                }
+                else return null;    
             }
-            callback();
+            else return null;
         }
     }

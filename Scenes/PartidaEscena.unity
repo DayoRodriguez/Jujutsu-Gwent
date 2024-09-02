@@ -783,7 +783,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -25.950684, y: 14.441711}
+  m_AnchoredPosition: {x: -25.949219, y: 14.441406}
   m_SizeDelta: {x: 212.1195, y: 77.5688}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &169715601
@@ -1219,8 +1219,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 324282638}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -435.84076, y: -70.349045, z: -10.029847}
+  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
+  m_LocalPosition: {x: 435, y: 56, z: -10.029847}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1237,7 +1237,7 @@ Transform:
   - {fileID: 879513917}
   - {fileID: 316499107}
   m_Father: {fileID: 559826564}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
 --- !u!1 &375132103
 GameObject:
   m_ObjectHideFlags: 0
@@ -2067,14 +2067,14 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 559826563}
-  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 324282639}
   m_Father: {fileID: 1768898978}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 196}
@@ -2100,7 +2100,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 44b69651ccc1f554da3f5ceea97d467a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e756697dad976654ea24d89e96538137, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2176,6 +2176,7 @@ MonoBehaviour:
   activingCard: {fileID: 0}
   board: {fileID: 1426538938}
   selectedRow: {fileID: 0}
+  effectSelectedCard: {fileID: 0}
   changePower: {fileID: 0}
   specialSummon: {fileID: 0}
   activeCard: {fileID: 0}
@@ -2210,8 +2211,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cardSelectionPanel: {fileID: 1049357712}
-  cardButtonPrefab: {fileID: 5312564779180349964, guid: 5f93fd1d4beccbf4e8f687551ae199b8, type: 3}
-  cardListContainer: {fileID: 0}
+  cardButtonPrefab: {fileID: 2696545424932650561, guid: 94c72c9fc7f78ef4fb0ac993b4ab609a, type: 3}
+  cardListContainer: {fileID: 2002362627}
   auxCard: {fileID: 0}
 --- !u!114 &623687940
 MonoBehaviour:
@@ -2266,6 +2267,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 536a67dabfa66714eb5c3c4d185a8146, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cardSelectionPanel: {fileID: 1049357712}
+  cardButtonPrefab: {fileID: 2696545424932650561, guid: 94c72c9fc7f78ef4fb0ac993b4ab609a, type: 3}
+  cardListContainer: {fileID: 2002362627}
   card: {fileID: 0}
   board: {fileID: 0}
   decks: {fileID: 0}
@@ -2282,6 +2286,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1d23770e86caf94e880c96393a6c783, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cardSelectionPanel: {fileID: 1049357712}
+  cardButtonPrefab: {fileID: 2696545424932650561, guid: 94c72c9fc7f78ef4fb0ac993b4ab609a, type: 3}
+  cardListContainer: {fileID: 2002362627}
+  cardPrefabs: {fileID: 6522575827237403951, guid: 75d20380559600e4c801d459d5cef116, type: 3}
+  card: {fileID: 0}
   board: {fileID: 0}
 --- !u!1 &654855835
 GameObject:
@@ -3326,11 +3335,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 1
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 540.5291
+  orthographic size: 480.77573
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -3355,7 +3364,7 @@ Transform:
   m_GameObject: {fileID: 879659813}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 441, y: 91, z: -10}
+  m_LocalPosition: {x: 449, y: 200, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4221,7 +4230,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -7.383301, y: -35.446014}
+  m_AnchoredPosition: {x: -7.3828125, y: -35.445312}
   m_SizeDelta: {x: 121.3371, y: 213.1613}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1295888355
@@ -4320,7 +4329,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: d826f2e94b3e0ef46b7c092481bdf74e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e9e3444b488ce384487ddcbb05184c78, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5149,11 +5158,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_UiScaleMode: 0
-  m_ReferencePixelsPerUnit: 100
+  m_ReferencePixelsPerUnit: 500
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_ScreenMatchMode: 2
+  m_MatchWidthOrHeight: 0.736
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -5169,7 +5178,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 879659815}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -5215,8 +5224,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 430, y: 93}
-  m_SizeDelta: {x: 2071.1348, y: 823.0926}
+  m_AnchoredPosition: {x: 460.0623, y: 223.39719}
+  m_SizeDelta: {x: 2000, y: 800}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1772105718
 GameObject:
@@ -5774,8 +5783,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1035.5674, y: -411.5463}
-  m_SizeDelta: {x: 1662.1736, y: 710.4008}
+  m_AnchoredPosition: {x: 993, y: -399}
+  m_SizeDelta: {x: 2000, y: 800}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2002362628
 MonoBehaviour:

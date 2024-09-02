@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 7
   name: Blame Me
-  effect: Summon an unit card from any graveyard
+  effect: SummonFromGraveyard
   faction: Neutral
   spriteImage: {fileID: 21300000, guid: ddb08e27c6a2bf2409706f9b3c79a4f7, type: 3}
-  IsActivated: 0
+  IsActivated: 1
   isLider: 0
   cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
   isSpecial: 1

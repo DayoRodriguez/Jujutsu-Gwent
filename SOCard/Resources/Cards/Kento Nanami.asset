@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 19
   name: Kento Nanami
-  effect: Target a card in the enemy's field and reduce his attack in 7 pionts, if
-    it's attack become in a number between 0 and 5, destroy the card
+  effect: ReducerCourt
   faction: Magician
   spriteImage: {fileID: 21300000, guid: 9ab5b5e25ee20c84487c0b1182247699, type: 3}
   IsActivated: 0
@@ -23,6 +22,8 @@ MonoBehaviour:
   cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
   isSpecial: 0
   isUnit: 1
+  cardEffects: 0
+  owner: 0
   power: 12
   kindAttack1: M
   kindAttack2: 

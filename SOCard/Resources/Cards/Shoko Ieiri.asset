@@ -14,14 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 32
   name: Shoko Ieiri
-  effect: Increase the attack of every card in a grow by 2 points
+  effect: IncreaseAttackByTwo
   faction: Magician
   spriteImage: {fileID: 21300000, guid: 628af55b1de545c4c9fd098a1dc62fa8, type: 3}
-  IsActivated: 0
+  IsActivated: 1
   isLider: 0
   cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
   isSpecial: 0
   isUnit: 1
+  cardEffects: 0
+  owner: 0
   power: 5
   kindAttack1: 
   kindAttack2: 

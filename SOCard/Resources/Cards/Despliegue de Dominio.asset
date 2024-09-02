@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 10
   name: Despliegue de Dominio
-  effect: Send to the graveyard any climate card that is on the field
+  effect: DespliegueDominio
   faction: Neutral
   spriteImage: {fileID: 21300000, guid: b958a9d4c684a7e4899213b3307f2ef0, type: 3}
-  IsActivated: 0
+  IsActivated: 1
   isLider: 0
   cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
   isSpecial: 0

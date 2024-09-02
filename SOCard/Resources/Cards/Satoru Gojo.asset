@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   name: Satoru Gojo
-  effect: Destroy until 3 enemy's card with less attack than this card
+  effect: Violet
   faction: Magician
   spriteImage: {fileID: 21300000, guid: 2e9bcb1e5385ca24a80a06f8165a3863, type: 3}
-  IsActivated: 0
+  IsActivated: 1
   isLider: 1
   cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
   isSpecial: 1

@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 22
   name: Mahoraga's Ritual
-  effect: Tribute the card with more attack in the M grow and summon a Divine Genral
-    Mahoraga from your deck or hand
+  effect: Ritual
   faction: Neutral
   spriteImage: {fileID: 21300000, guid: d31d637bf899b274caed2279e9b0926b, type: 3}
   IsActivated: 0

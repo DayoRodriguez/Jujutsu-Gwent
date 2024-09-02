@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 13
   name: Doble Alma
-  effect: Take a control of a card in rival's field
+  effect: TakeControl
   faction: Neutral
   spriteImage: {fileID: 21300000, guid: 8abf16804f08ef345b86b634a18a4422, type: 3}
   IsActivated: 0

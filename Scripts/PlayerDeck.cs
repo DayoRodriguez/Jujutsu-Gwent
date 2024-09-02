@@ -23,15 +23,17 @@ public class PlayerDeck : MonoBehaviour
     public Transform LeaderCard;
     public Transform OpponentLeaderCard;
 
+    private BoardManager board;
+
     // Start is called before the first frame update
     void Start()
     {
+        board = FindObjectOfType<BoardManager>();
+
         DeckCreator(FactionSelection.Instance.playerFactionDeck, deck, ref playerLeaderInstantiated, LeaderCard);
-        //DeckCreator("Magician", deck, ref playerLeaderInstantiated, LeaderCard);
         InstantiateDeck(deck, playerDeck); 
 
-        DeckCreator(FactionSelection.Instance.opponentFactionDeck, opponentDeck, ref opponentLeaderInstantiated, OpponentLeaderCard);
-        //DeckCreator("Curse", opponentDeck, ref opponentLeaderInstantiated, OpponentLeaderCard);  
+        DeckCreator(FactionSelection.Instance.opponentFactionDeck, opponentDeck, ref opponentLeaderInstantiated, OpponentLeaderCard);  
         InstantiateDeck(opponentDeck, OpponentPlayerDeck);
 
         // FirstDraw(PlayerHand,playerDeck);
@@ -50,12 +52,12 @@ public class PlayerDeck : MonoBehaviour
     { 
         UnitCard cardLider = null;
 
-        for(int i = 0; i < CardDataBase.cardData.Count; i++)
+        for(int i = 0; i < CardDataBase.leaderData.Count; i++)
         {
-            if(CardDataBase.cardData[i].isUnit) cardLider = (UnitCard)CardDataBase.cardData[i];
+            if(CardDataBase.leaderData[i].isUnit) cardLider = (UnitCard)CardDataBase.leaderData[i];
             else continue;
             
-            if(cardLider.isLider && !leaderInstantiated && !deck.Contains(cardLider) && cardLider.faction.ToLower().Equals(factionDeck.ToLower()))
+            if(!leaderInstantiated && cardLider.faction.ToLower().Equals(factionDeck.ToLower()))
             { 
                 GameObject leader = Instantiate(Cards, leaderCardSlot);
                 leader.transform.localScale = Vector3.one;
@@ -72,9 +74,11 @@ public class PlayerDeck : MonoBehaviour
                 }
 
                 DisplayCard leaderDisplayCard = leader.GetComponent<DisplayCard>();
+                
                 if(leaderDisplayCard != null && leader != null)
                 {
-                    cardLider.IsActivated = true;
+                    cardLider.isActivated = true;
+                    cardLider.owner = leaderCardSlot == board.transformLeaderCardSlot ? Card.Owner.Player : Card.Owner.Opponent;
                     leaderDisplayCard.SetUp(cardLider);
                 }
                 leaderInstantiated = true;
@@ -86,15 +90,17 @@ public class PlayerDeck : MonoBehaviour
         {
             int counter = Random.Range(0,CardDataBase.cardData.Count);
             Card auxCard = CardDataBase.cardData[counter];                       
-            if(!auxCard.isLider && (auxCard.faction.ToLower().Equals(cardLider.faction.ToLower()) 
+            if((auxCard.faction.ToLower().Equals(cardLider.faction.ToLower()) 
             || auxCard.faction.ToLower().Equals("neutral")))
             {
                 if(!deck.Contains(auxCard))
                 {
+                    auxCard.owner = leaderCardSlot == board.transformLeaderCardSlot ? Card.Owner.Player : Card.Owner.Opponent;
                     deck.Add(auxCard);
                 } 
                 else if(!auxCard.isSpecial && Count(auxCard, deck) < 3) 
                 {
+                    auxCard.owner = leaderCardSlot == board.transformLeaderCardSlot ? Card.Owner.Player : Card.Owner.Opponent;
                     deck.Add(auxCard);
                 }    
             }
@@ -124,7 +130,7 @@ public class PlayerDeck : MonoBehaviour
             DisplayCard displayCard = cardinDeck.GetComponent<DisplayCard>();
             if(displayCard != null && c != null)
             {
-                c.IsActivated = false;
+                c.isActivated = false;
                 displayCard.SetUp(c);
             }
             else Debug.Log("La carta no fue cargada");
@@ -141,9 +147,9 @@ public class PlayerDeck : MonoBehaviour
             DisplayCard selectedCard = cardsToDraw[random];
             cardsToDraw = RemovedCardFromArray(cardsToDraw, random);
 
-            selectedCard.card.IsActivated = true;
+            selectedCard.card.isActivated = true;
             Card copyCard = Instantiate(selectedCard.card);
-            copyCard.IsActivated = true;
+            copyCard.isActivated = true;
             selectedCard.SetUp(copyCard);
 
             selectedCard.transform.SetParent(hand);
@@ -224,7 +230,7 @@ public class PlayerDeck : MonoBehaviour
                         mulliganCount ++;
                         cardH.card.HasBeenMulligan = true;
                         cardH.card.IsSelected = false;
-                        cardH.card.IsActivated = false;
+                        cardH.card.isActivated = false;
                         cardH.SetUp(cardH.card);
 
                         cardH.transform.SetParent(deck);
@@ -258,7 +264,7 @@ public class PlayerDeck : MonoBehaviour
                 cardD.gameObject.AddComponent<CardLogic>();
             }
 
-        cardD.card.IsActivated = true;
+        cardD.card.isActivated = true;
         cardD.SetUp(cardD.card);
 
         cardD.transform.SetParent(hand);

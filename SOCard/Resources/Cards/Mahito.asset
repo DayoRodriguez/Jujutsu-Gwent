@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 21
   name: Mahito
-  effect: Target a card in the field and change his attack in a value between 0 and
-    20
+  effect: SoulMutation
   faction: Curse
   spriteImage: {fileID: 21300000, guid: 9d4cd42c5cffee240b58936fbffd931a, type: 3}
   IsActivated: 0
@@ -23,6 +22,8 @@ MonoBehaviour:
   cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
   isSpecial: 1
   isUnit: 1
+  cardEffects: 0
+  owner: 0
   power: 14
   kindAttack1: M
   kindAttack2: R

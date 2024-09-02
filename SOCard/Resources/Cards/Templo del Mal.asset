@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 33
   name: Templo del Mal
-  effect: Divide the attack of all card in the grow with the greatest attack in each
-    field by the difference between the cards in your grow and your rival's one.
-    If your lider card is Ryomen Sukuna apply this effect just to the rival's grow
+  effect: TempleEvil
   faction: Neutral
   spriteImage: {fileID: 21300000, guid: 1a8c8d7d87416344c819d09bf908ca3e, type: 3}
-  IsActivated: 0
+  IsActivated: 1
   isLider: 0
   cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
   isSpecial: 1
+  isUnit: 0
+  cardEffects: 0
+  owner: 0
   type: Climate

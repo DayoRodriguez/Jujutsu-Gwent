@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 9
   name: Dagon
-  effect: Activated a climate card from your hand
+  effect: AcivateClimate
   faction: Curse
   spriteImage: {fileID: 21300000, guid: 3a3e91ca32bb54349836e52ae2a38f1e, type: 3}
-  IsActivated: 0
+  IsActivated: 1
   isLider: 0
   cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
   isSpecial: 0

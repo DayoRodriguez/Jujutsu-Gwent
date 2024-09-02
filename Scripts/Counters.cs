@@ -20,7 +20,7 @@ public class Counters : MonoBehaviour
     private void UpdatePower()
     {
         int power = Counter(meleeRow) + Counter(rangedRow) + Counter(siegeRow);
-        Debug.Log(power.ToString());
+        //Debug.Log(power.ToString());
         textCounter.text = power.ToString();
     }
 

@@ -1,9 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ActiveCardEffect : MonoBehaviour , ICardEffect
 {
+    public GameObject cardSelectionPanel;  // Panel que contendrá las cartas
+    public GameObject cardButtonPrefab;    // Prefab de un botón para cada carta
+    public Transform cardListContainer;
+    public GameObject cardPrefabs;
+
     public GameObject card;
     public BoardManager board;
     private CardEffects cardEffect;
@@ -12,16 +18,20 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
 
-        cardEffect = FindObjectOfType<CardEffects>();
+        Initialize();
 
-        card = cardEffect.activingCard;
+        //cardEffect = FindObjectOfType<CardEffects>();
+
+        //card = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
             case "ActiveIncrease" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ActiveIncrease(activingCard);
                 break;
             case "AcivateClimate" :  
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 AcivateClimate(activingCard);
                 break;
             default :
@@ -29,9 +39,9 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
         }
     }
 
-    public void Initialize(Card card)
+    public void Initialize()
     {
-
+        board = FindObjectOfType<BoardManager>();
     }
 
     public void ShowMessagePanel(string sms)
@@ -74,8 +84,7 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
 
             if(cardsToChoose.Count != 0)
             {
-                //implementar codigo para mostrar un panel con las cartas a elegir y seleccionarla
-                //ademas de implementar la seleccionde la destiny Row
+                ShowCardSelectionPanel(cardsToChoose);
             }
             else
             {
@@ -86,6 +95,45 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
         {
             ShowMessagePanel("No es posible activar la carta");
         }
+    }
+
+    private void ShowCardSelectionPanel(List<DisplayCard> cardsToChoose)
+    {
+        foreach(Transform child in cardListContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        cardSelectionPanel.SetActive(true);
+
+        foreach(DisplayCard c in cardsToChoose)
+        {
+            GameObject button = Instantiate(cardButtonPrefab, cardListContainer);
+            button.GetComponentInChildren<UnityEngine.UI.Text>().text = " ";
+            button.GetComponentInChildren<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(c.card.name);
+
+            button.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => ActivateSelectedCard(c));
+        }
+    }
+
+    private void ActivateSelectedCard(DisplayCard c)
+    {
+        cardSelectionPanel.SetActive(false);
+
+        Transform destinationRow = c.card.owner == Card.Owner.Player
+        ?board.GetPlayerRowForCard(c) 
+        :board.GetOpponentRowForCard(c);
+
+        GameObject cardObject = Instantiate(cardPrefabs);
+
+        cardObject.transform.SetParent(destinationRow);
+        cardObject.transform.localScale = Vector3.one;
+        cardObject.transform.localPosition = Vector3.zero;
+        cardObject.transform.localRotation = Quaternion.identity;
+        
+        c.card.isActivated = true;
+        cardObject.GetComponent<DisplayCard>().SetUp(c.card);  
+
     }
 
 

@@ -24,7 +24,7 @@ public class DisplayCard : MonoBehaviour
         {
             card = c;
             if(imageCard == null) imageCard = GetComponent<Image>();
-            if(!c.IsActivated) imageCard.sprite = c.cardBack;
+            if(!c.isActivated) imageCard.sprite = c.cardBack;
             else imageCard.sprite = c.spriteImage;
         }
     }

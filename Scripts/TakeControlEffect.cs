@@ -10,14 +10,16 @@ public class TakeControlEffect : MonoBehaviour , ICardEffect
     
     public void Execute(GameObject activingCard)
     {
+        Initialize();
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        cardEffect = FindObjectOfType<CardEffects>();
+        //cardEffect = FindObjectOfType<CardEffects>();
 
-        card = cardEffect.activingCard;
+        //card = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
             case "TakeControl" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 TakeControl(activingCard);
                 break;
             default :
@@ -25,9 +27,9 @@ public class TakeControlEffect : MonoBehaviour , ICardEffect
         }
     }
 
-    public void Initialize(Card card)
+    public void Initialize()
     {
-
+        board = FindObjectOfType<BoardManager>();
     }
 
     public void ShowMessagePanel(string sms)
@@ -56,19 +58,31 @@ public class TakeControlEffect : MonoBehaviour , ICardEffect
     public void TakeControl(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        DisplayCard cardToControl;
-        Transform selectionRow;
 
         if(activingC.card.owner == Card.Owner.Player && 
         (ThereIsCard(board.opponentTransformSeigeRow) || ThereIsCard(board.opponentTransformRangedRow) || ThereIsCard(board.opponentTransformMeleeRow)))
         {
-            cardToControl = board.SelectionCard().transform.GetComponent<DisplayCard>();
-            selectionRow = board.SelectionRow();
-            cardToControl.transform.SetParent(selectionRow);
+            board.SelectionCardIfNeeded
+            (
+                card => 
+                {
+                   DisplayCard cardToControl = card.GetComponent<DisplayCard>();
 
-            cardToControl.transform.localScale = Vector3.one;
-            cardToControl.transform.localPosition = Vector3.zero;
-            cardToControl.transform.localRotation = Quaternion.identity;           
+                   board.SelectionRowIfNeeded
+                   (
+                        row =>
+                        {
+                            Transform selectionRow = row;
+                            cardToControl.transform.SetParent(selectionRow);
+
+                            cardToControl.transform.localScale = Vector3.one;
+                            cardToControl.transform.localPosition = Vector3.zero;
+                            cardToControl.transform.localRotation = Quaternion.identity;
+                        }
+                   );        
+                }
+            );
+                       
                         
         }
     }

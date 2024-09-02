@@ -12,13 +12,15 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
     public void Execute(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        cardEffect = FindObjectOfType<CardEffects>();
+        Initialize();
+        //cardEffect = FindObjectOfType<CardEffects>();
 
-        card = cardEffect.activingCard;
+        //card = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
             case "DrawAsManyAsI" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 DrawAsManyAsI(activingCard);
                 break;
             default :
@@ -26,9 +28,9 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
         }
     }
 
-    public void Initialize(Card card)
+    public void Initialize()
     {
-
+        board = FindObjectOfType<BoardManager>();
     }
 
     public void ShowMessagePanel(string sms)
@@ -132,7 +134,7 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
                 {
                     if(hand == board.transformPlayerHand)
                     {
-                        cardToDraw.card.IsActivated = true;
+                        cardToDraw.card.isActivated = true;
                         cardToDraw.SetUp(cardToDraw.card);
 
                         cardToDraw.transform.SetParent(board.transformGraveyard);
@@ -144,7 +146,7 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
                     }
                     else
                     {
-                        cardToDraw.card.IsActivated = true;
+                        cardToDraw.card.isActivated = true;
                         cardToDraw.SetUp(cardToDraw.card);
 
                         cardToDraw.transform.SetParent(board.opponentTransformGraveyard);
@@ -157,7 +159,7 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
                 }
                 else 
                 {
-                    cardToDraw.card.IsActivated = true;
+                    cardToDraw.card.isActivated = true;
                     cardToDraw.SetUp(cardToDraw.card);
 
                     cardToDraw.transform.SetParent(hand);

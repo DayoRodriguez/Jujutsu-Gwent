@@ -15,9 +15,10 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
 
-        cardEffect = FindObjectOfType<CardEffects>();
+        Initialize();
+        //cardEffect = FindObjectOfType<CardEffects>();
 
-        activingCard = cardEffect.activingCard;
+        //activingCard = cardEffect.activingCard;
 
         StartCoroutine(HandleEffectExecution(activingC, activingCard));
     }
@@ -58,36 +59,45 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         switch(activingC.card.effect)
         {
             case "ReduceByFive" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ModifyRowByPower(selectedRow, activingCard, (c, actPower) => c.card.SetAttack(c.card.GetPower() - 5), 
                 "La Seleccionada no es valida, Vuelva a intentarlo");
                 break;
             case "ChangeToLower" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ApplyToRow(selectedRow, ChangeToLower);
                 break;
             case "Absorption" :
-                selectedCard = board.SelectionCard();
-                Absorption(activingCard, selectedCard);
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
+                Absorption(activingCard);
                 break;        
             case "ReducerCourt" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ReducerCourt(selectedCard);
                 break;
             case "ChangeToAverage" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ApplyToAllRows(ChangeToAverage);
                 break;
             case "SoulMutation" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 SoulMutation(selectedCard, UnityEngine.Random.Range(0,21));
                 break;            
             case "BloodManipulation" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 BloodManipulation(activingCard);
                 break;
             case "Vudu" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 Vudu(activingCard, selectedCard);
                 break;
             case "IncreaseAttackByTwo" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ModifyRowByPower(selectedRow, activingCard, (c, actPower) => c.card.SetAttack(c.card.GetPower() + 2), 
                 "La fila seleccionada no es valida, Vuelva a intentarlo");
                 break;            
             case "TempleEvil" :
+                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 TempleEvil(activingCard);
                 break;    
             default :
@@ -97,9 +107,9 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         }
     }
 
-    public void Initialize(Card card)
+    public void Initialize()
     {
-       // activingCard.GetComponent<DisplayCard>().card = card;
+       board = FindObjectOfType<BoardManager>();
     }
 
     public void ShowMessagePanel(string sms)
@@ -153,21 +163,29 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     }
 
     //Hanami's Effect
-    public void Absorption(GameObject activingCard, GameObject targedCard)
+    public IEnumerator Absorption(GameObject activingCard)
     {
-        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        DisplayCard targedC = targedCard.GetComponent<DisplayCard>();
+        yield return board.WaitForSelection<GameObject>
+        (
+            seletedCard => {
 
-        if(targedC != null && activingC != null && targedC.card.isUnit && activingC.card.isUnit)
-        {
-            int absorpbedAttack = targedC.card.GetPower();
-            targedC.card.SetAttack(0);
-            activingC.card.SetAttack(activingC.card.GetPower() + absorpbedAttack);
-        }
-        else
-        {
-            ShowMessagePanel("La carta seleccionada no es valida");
-        }
+                DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
+                DisplayCard targedC = selectedCard.GetComponent<DisplayCard>();
+
+                if(targedC != null && activingC != null && targedC.card.isUnit && activingC.card.isUnit)
+                {
+                    int absorpbedAttack = targedC.card.GetPower();
+                    targedC.card.SetAttack(0);
+                    activingC.card.SetAttack(activingC.card.GetPower() + absorpbedAttack);
+                }
+                else
+                {
+                    ShowMessagePanel("La carta seleccionada no es valida");
+                } 
+                
+            },
+            () => board.effectSelectedCard == null
+        );
     }
 
     //Nanami's Effect
@@ -493,6 +511,7 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         }
     }
 
+    //======Metodos Basicos para utilizar en los effectos=============================
     private void DivideAttack(Transform Row, int count)
     {
         DisplayCard[] cards = Row.GetComponentsInChildren<DisplayCard>();
