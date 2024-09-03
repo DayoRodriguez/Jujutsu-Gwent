@@ -42,27 +42,29 @@ public class CardEffects : MonoBehaviour
         SetActivingCard(activingCard);
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
 
-        if (NeedsRowSelection())
-        {
-            board.SelectionRowIfNeeded(selectedRow =>
-            {
-                this.selectedRow = selectedRow;
-                ExecuteEffectBasedOnCardEffect(activingC);
-            });
-        }
-        else if (NeedsCardSelection())
-        {
-            board.SelectionCardIfNeeded(selectedCard =>
-            {
+        // if (NeedsRowSelection())
+        // {
+        //     board.SelectionRowIfNeeded(selectedRow =>
+        //     {
+        //         this.selectedRow = selectedRow;
+        //         ExecuteEffectBasedOnCardEffect(activingC);
+        //     });
+        // }
+        // else if (NeedsCardSelection())
+        // {
+        //     board.SelectionCardIfNeeded(selectedCard =>
+        //     {
             
-                this.effectSelectedCard = selectedCard;
-                ExecuteEffectBasedOnCardEffect(activingC);
-            });
-        }
-        else
-        {
-            ExecuteEffectBasedOnCardEffect(activingC);
-        }
+        //         this.effectSelectedCard = selectedCard;
+        //         ExecuteEffectBasedOnCardEffect(activingC);
+        //     });
+        // }
+        // else
+        // {
+        //     ExecuteEffectBasedOnCardEffect(activingC);
+        // }
+        ExecuteEffectBasedOnCardEffect(activingC);
+
     }
 
     public void SetActivingCard(GameObject card)

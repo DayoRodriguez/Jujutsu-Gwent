@@ -9,44 +9,31 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
     public GameObject cardSelectionPanel;  // Panel que contendrá las cartas
     public GameObject cardButtonPrefab;    // Prefab de un botón para cada carta
     public Transform cardListContainer;
+    public GameObject cardPrefabs;
 
-    public GameObject card;
     public BoardManager board;
-    public PlayerDeck decks;
-    public GameObject ShowCardPanel;
     private CardEffects cardEffect;
 
     public void Execute(GameObject activingCard)
     {   
         Initialize();
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        //cardEffect = FindObjectOfType<CardEffects>();
-
-        //card = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
             case "AddSpecialCard" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                if(activingC.card.owner == Card.Owner.Player)
-                {
-                    AddSpecialCard(board.transformDeck, board.transformPlayerHand);
-                }
-                else
-                {
-                    AddSpecialCard(board.opponentTransformDeck, board.opponentTransformPlayerHand);
-                }
+                Transform deckOrigen = activingC.card.owner == Card.Owner.Player ? board.transformDeck : board.opponentTransformDeck;
+                Transform gravOrigen = activingC.card.owner == Card.Owner.Player ? board.transformGraveyard : board.opponentTransformGraveyard;
+                Transform[] origenes = {deckOrigen, gravOrigen};
+                AddSpecialCard(origenes);
+                EndEffect(activingCard);
                 break;
             case "AddSpecialCardDeck" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                if(activingC.card.owner == Card.Owner.Player)
-                {
-                    AddSpecialCardDeck(board.transformDeck, board.transformPlayerHand);
-                }
-                else
-                {
-                    AddSpecialCardDeck(board.opponentTransformDeck, board.opponentTransformPlayerHand);
-                }
+                Transform origen = activingC.card.owner == Card.Owner.Player ? board.transformDeck : board.opponentTransformDeck;
+                AddSpecialCardDeck(origen);
+                EndEffect(activingCard);
                 break;
             default :
                 break;    
@@ -55,8 +42,6 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
 
     public void Initialize()
     {
-        //cardSelectionPanel = GameObject.Find("cardSelectionPanel");
-        //cardListContainer = GameObject.Find("cardListContainer").GetComponent<Transform>();
         board = FindObjectOfType<BoardManager>();
     }
 
@@ -83,86 +68,55 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
     }
 
     //Dominio's Expansion's effect
-    public void AddSpecialCard(Transform origen, Transform hand)
+    public void AddSpecialCard(Transform[] origenes)
     {
-        DisplayCard selectedCard = SelectionCard(origen);
-        if(!selectedCard.card.isUnit)
+        List<DisplayCard> selectedCards = new List<DisplayCard>();
+        foreach(Transform t in origenes)
         {
-            MovedCardToDestination(origen, hand, selectedCard.gameObject);
+            foreach(DisplayCard c in GetCards(t, false)) selectedCards.Add(c);
         }
+        if(selectedCards.Count != 0) ShowCardToAdd(selectedCards);
+        else Debug.Log("NO SE PUEDE ACTIVAR EL EFFECTO");
     }
 
     //Maki Zennin's effect
-    public void AddSpecialCardDeck(Transform origen, Transform hand)
+    public void AddSpecialCardDeck(Transform origen)
     {
-        DisplayCard selectedCard = SelectionCard(origen);
-        if(!selectedCard.card.isUnit)
-        {
-            MovedCardToDestination(origen, hand, selectedCard.gameObject);
-        }
+        List<DisplayCard> selectedCards = GetCards(origen, false);
+        if(selectedCards.Count != 0) ShowCardToAdd(selectedCards);
+        else Debug.Log("NO SE PUEDE ACTIVAR EL EFFECTO");
     }
 
 //-------Metodos basicos para utilizar en los efectos -----------------------------------------------------------------
-    private void MovedCardToDestination(Transform origin, Transform destiantion, GameObject cardToMoved)
+    private List<DisplayCard> GetCards(Transform orig, bool b)
     {
-        DisplayCard cardTM = cardToMoved.GetComponent<DisplayCard>();
+        List<DisplayCard> cardsToAdd = new List<DisplayCard>();
+        DisplayCard[] cards = orig.GetComponentsInChildren<DisplayCard>();
 
-        if(CardExistInOrigin(origin, cardTM))
+        foreach(DisplayCard c in cards)
         {
-            if(destiantion.childCount < 10)
-            {
-                MovedCard(cardTM, destiantion);
-            }
+            if(b && c.card.isUnit) cardsToAdd.Add(c);
+            else if(!c.card.isUnit) cardsToAdd.Add(c);
         }
-        else 
-        {
-            Transform grav = destiantion == board.transformPlayerHand ? board.transformGraveyard : board.opponentTransformGraveyard;
-            MovedCard(cardTM, grav);
-        }
+        return cardsToAdd;
     }
 
-    private void MovedCard(DisplayCard cardToMove, Transform destination)
+    private void ShowCardToAdd(List<DisplayCard> cardsToAdd)
     {
-        if(cardToMove.gameObject.GetComponent<CardLogic>() == null)
-        {
-            cardToMove.gameObject.AddComponent<CardLogic>();
-        }
-
-        cardToMove.card.isActivated = true;
-        cardToMove.SetUp(cardToMove.card);
-
-        cardToMove.transform.SetParent(destination);
-        cardToMove.transform.localScale = Vector3.one;
-        cardToMove.transform.localPosition = Vector3.zero;
-        cardToMove.transform.localRotation = Quaternion.identity;
-    }
-
-    private DisplayCard SelectionCard(Transform orig)
-    {
-        DisplayCard[] cardsInOrig = orig.GetComponentsInChildren<DisplayCard>();
-        ShowCardToSelect(cardsInOrig);
-        return null;   
-    }
-
-    private void ShowCardToSelect(DisplayCard[] cardsToShow)
-    {
-        cardSelectionPanel.SetActive(true);
-
         foreach(Transform child in cardListContainer)
         {
-            Destroy(child);
+            Destroy(child.gameObject);
         }
 
-        foreach(DisplayCard c in cardsToShow)
+        cardSelectionPanel.SetActive(true);
+
+        foreach(DisplayCard c in cardsToAdd)
         {
-            GameObject cardButton = Instantiate(cardButtonPrefab, cardListContainer);
-
-            cardButton.GetComponent<Text>().text = c.card.name;
-
-            cardButton.GetComponent<Button>().onClick.AddListener(() => OnCardSelected(c));
+            GameObject cardB = Instantiate(cardButtonPrefab, cardListContainer);
+            cardB.GetComponent<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(c.card.name);
+            cardB.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => OnCardSelected(c));
         }
     }
-
     private void OnCardSelected(DisplayCard selectedC)
     {
         Transform ownerHand = selectedC.card.owner == Card.Owner.Player ? board.transformPlayerHand : board.opponentTransformPlayerHand;
@@ -174,44 +128,28 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
 
     private void AddCardToHand(DisplayCard selectedCard, Transform hand)
     {
+        GameObject cardToAdd = Instantiate(cardPrefabs);
+        cardToAdd.transform.localPosition = Vector3.zero;
+        cardToAdd.transform.localScale = Vector3.one;
+        cardToAdd.transform.localRotation = Quaternion.identity;
+
         if(hand.childCount >= 10)
         {
             if(hand == board.transformPlayerHand)
             {
-                selectedCard.transform.SetParent(board.transformGraveyard);
+                cardToAdd.transform.SetParent(board.transformGraveyard);
             }
             else
             {
-                selectedCard.transform.SetParent(board.opponentTransformGraveyard);
+                cardToAdd.transform.SetParent(board.opponentTransformGraveyard);
             }
         }
         else 
         {
-            selectedCard.transform.SetParent(hand);
+            cardToAdd.transform.SetParent(hand);
         }
 
-        selectedCard.transform.localPosition = Vector3.zero;
-        selectedCard.transform.localScale = Vector3.one;
-        selectedCard.transform.localRotation = Quaternion.identity;
         selectedCard.card.isActivated = true;
-        selectedCard.SetUp(selectedCard.card);
-    }
-
-
-    private bool CardExistInOrigin(Transform origin, DisplayCard cardToLook)
-    {
-        DisplayCard[] cardsInOrigin = origin.GetComponents<DisplayCard>();
-        if(cardsInOrigin.Length != 0)
-        {
-            foreach(DisplayCard c in cardsInOrigin)
-            {
-                if(c.card.name.Equals(cardToLook.card.name))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        else return false;
+        cardToAdd.GetComponent<DisplayCard>().SetUp(selectedCard.card);
     }
 }

@@ -2213,7 +2213,7 @@ MonoBehaviour:
   cardSelectionPanel: {fileID: 1049357712}
   cardButtonPrefab: {fileID: 2696545424932650561, guid: 94c72c9fc7f78ef4fb0ac993b4ab609a, type: 3}
   cardListContainer: {fileID: 2002362627}
-  auxCard: {fileID: 0}
+  cardPrefabs: {fileID: 6522575827237403951, guid: 75d20380559600e4c801d459d5cef116, type: 3}
 --- !u!114 &623687940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2270,10 +2270,8 @@ MonoBehaviour:
   cardSelectionPanel: {fileID: 1049357712}
   cardButtonPrefab: {fileID: 2696545424932650561, guid: 94c72c9fc7f78ef4fb0ac993b4ab609a, type: 3}
   cardListContainer: {fileID: 2002362627}
-  card: {fileID: 0}
+  cardPrefabs: {fileID: 6522575827237403951, guid: 75d20380559600e4c801d459d5cef116, type: 3}
   board: {fileID: 0}
-  decks: {fileID: 0}
-  ShowCardPanel: {fileID: 0}
 --- !u!114 &623687944
 MonoBehaviour:
   m_ObjectHideFlags: 0

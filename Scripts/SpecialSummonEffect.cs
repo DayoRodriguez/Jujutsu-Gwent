@@ -9,9 +9,11 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
     public GameObject cardSelectionPanel;  // Panel que contendrá las cartas
     public GameObject cardButtonPrefab;    // Prefab de un botón para cada carta
     public Transform cardListContainer;   
+    public GameObject cardPrefabs;
+
     private Card activingCard;
     private BoardManager board;
-    public GameObject auxCard;
+    
     private CardEffects cardEffect;
 
     public void Execute(GameObject activingCard)
@@ -67,8 +69,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
 
     public void Initialize()
     {
-        //cardSelectionPanel = GameObject.Find("cardSelectionPanel");
-        //cardListContainer = GameObject.Find("cardListContainer").GetComponent<Transform>();
         board = FindObjectOfType<BoardManager>();
     }
 
@@ -125,7 +125,7 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         int randomIndex = UnityEngine.Random.Range(0, CardDataBase.tokenData.Count);
         Card tokenCardToSummon = CardDataBase.tokenData[randomIndex];
 
-        GameObject token = Instantiate(auxCard, rowParent);
+        GameObject token = Instantiate(cardPrefabs, rowParent);
         
         token.transform.localScale = Vector3.one;
         token.transform.localPosition = Vector3.zero;
