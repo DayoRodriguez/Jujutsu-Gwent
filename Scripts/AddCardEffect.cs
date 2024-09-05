@@ -26,13 +26,13 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
                 Transform deckOrigen = activingC.card.owner == Card.Owner.Player ? board.transformDeck : board.opponentTransformDeck;
                 Transform gravOrigen = activingC.card.owner == Card.Owner.Player ? board.transformGraveyard : board.opponentTransformGraveyard;
                 Transform[] origenes = {deckOrigen, gravOrigen};
-                AddSpecialCard(origenes);
+                AddSpecialCard(activingC, origenes);
                 EndEffect(activingCard);
                 break;
             case "AddSpecialCardDeck" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 Transform origen = activingC.card.owner == Card.Owner.Player ? board.transformDeck : board.opponentTransformDeck;
-                AddSpecialCardDeck(origen);
+                AddSpecialCardDeck(activingC, origen);
                 EndEffect(activingCard);
                 break;
             default :
@@ -68,22 +68,36 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
     }
 
     //Dominio's Expansion's effect
-    public void AddSpecialCard(Transform[] origenes)
+    public void AddSpecialCard(DisplayCard activingC, Transform[] origenes)
     {
         List<DisplayCard> selectedCards = new List<DisplayCard>();
         foreach(Transform t in origenes)
         {
             foreach(DisplayCard c in GetCards(t, false)) selectedCards.Add(c);
         }
-        if(selectedCards.Count != 0) ShowCardToAdd(selectedCards);
+        if(selectedCards.Count != 0)
+        {
+            foreach(DisplayCard c in selectedCards)
+            {
+                c.card.owner = activingC.card.owner;
+            }
+            ShowCardToAdd(selectedCards);
+        }
         else Debug.Log("NO SE PUEDE ACTIVAR EL EFFECTO");
     }
 
     //Maki Zennin's effect
-    public void AddSpecialCardDeck(Transform origen)
+    public void AddSpecialCardDeck(DisplayCard activingC, Transform origen)
     {
         List<DisplayCard> selectedCards = GetCards(origen, false);
-        if(selectedCards.Count != 0) ShowCardToAdd(selectedCards);
+        if(selectedCards.Count != 0)
+        {
+            foreach(DisplayCard c in selectedCards)
+            {
+                c.card.owner = activingC.card.owner;
+            }
+            ShowCardToAdd(selectedCards);
+        } 
         else Debug.Log("NO SE PUEDE ACTIVAR EL EFFECTO");
     }
 
@@ -98,6 +112,7 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
             if(b && c.card.isUnit) cardsToAdd.Add(c);
             else if(!c.card.isUnit) cardsToAdd.Add(c);
         }
+        
         return cardsToAdd;
     }
 
@@ -128,28 +143,27 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
 
     private void AddCardToHand(DisplayCard selectedCard, Transform hand)
     {
-        GameObject cardToAdd = Instantiate(cardPrefabs);
-        cardToAdd.transform.localPosition = Vector3.zero;
-        cardToAdd.transform.localScale = Vector3.one;
-        cardToAdd.transform.localRotation = Quaternion.identity;
+        selectedCard.gameObject.transform.localPosition = Vector3.zero;
+        selectedCard.gameObject.transform.localScale = Vector3.one;
+        selectedCard.gameObject.transform.localRotation = Quaternion.identity;
 
         if(hand.childCount >= 10)
         {
             if(hand == board.transformPlayerHand)
             {
-                cardToAdd.transform.SetParent(board.transformGraveyard);
+                selectedCard.gameObject.transform.SetParent(board.transformGraveyard);
             }
             else
             {
-                cardToAdd.transform.SetParent(board.opponentTransformGraveyard);
+                selectedCard.gameObject.transform.SetParent(board.opponentTransformGraveyard);
             }
         }
         else 
         {
-            cardToAdd.transform.SetParent(hand);
+            selectedCard.gameObject.transform.SetParent(hand);
         }
 
         selectedCard.card.isActivated = true;
-        cardToAdd.GetComponent<DisplayCard>().SetUp(selectedCard.card);
+        selectedCard.SetUp(selectedCard.card);
     }
 }

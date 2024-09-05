@@ -28,7 +28,7 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         {
             case "SummonFromGraveyard":
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                SummonFromGraveyard();
+                SummonFromGraveyard(activingCard);
                 EndEffect(activingCard);
                 break;
             case "SummonToken" :
@@ -95,28 +95,20 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
     }
 
     //Blame Me'S Effect
-    public void SummonFromGraveyard()
+    public void SummonFromGraveyard(GameObject activingCard)
     {
-        DisplayCard[] playerGraveyard = board.transformGraveyard.GetComponents<DisplayCard>();
-        DisplayCard[] opponentGraveyard = board.opponentTransformGraveyard.GetComponents<DisplayCard>();
         List<DisplayCard> cardsToShow = new List<DisplayCard>();
+        Transform[] origenes = {board.transformGraveyard, board.opponentTransformGraveyard};
+        foreach(Transform t in origenes)
+        {
+            foreach(DisplayCard c in GetCards(t,true)) cardsToShow.Add(c);
+        }
+        for(int i = 0; i < cardsToShow.Count; i++)
+        {
+            cardsToShow[i].card.owner = activingCard.GetComponent<DisplayCard>().card.owner;
+        }
         
-        if(playerGraveyard.Length != 0)
-        {
-            foreach(DisplayCard c in playerGraveyard)
-            {
-                if(c.card.isUnit) cardsToShow.Add(c);
-            }
-        }
-        if(opponentGraveyard.Length != 0)
-        {
-            foreach(DisplayCard c in opponentGraveyard)
-            {
-                if(c.card.isUnit) cardsToShow.Add(c);
-            }
-        }
-        DisplayCard[] auxCards = cardsToShow.ToArray();
-        ShowCardSelectionPanel(auxCards);
+        if(cardsToShow.Count != 0) ShowCardSelectionPanel(cardsToShow);
     }
 
     //Fishiguro Megumi's effect
@@ -150,17 +142,9 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
 
     //Jardin Sombrio de quimeras' effect
     public void ShadowGarden(GameObject activingCard)
-    {
-        int cardsInMelee = HowManyCardsByRow(board.transformMeleeRow);
-        int cardsInRanged = HowManyCardsByRow(board.transformRangedRow);
-        int cardsInSeige = HowManyCardsByRow(board.transformSeigeRow);
-
-        int cardsInOppMelee = HowManyCardsByRow(board.opponentTransformMeleeRow);
-        int cardsInOppRanged = HowManyCardsByRow(board.opponentTransformRangedRow);
-        int cardsInOppSeige = HowManyCardsByRow(board.opponentTransformSeigeRow);
-        
-        int cardsInPlayerField = cardsInMelee + cardsInRanged + cardsInSeige;
-        int cardsInOppField = cardsInOppMelee + cardsInOppRanged + cardsInOppSeige;
+    {   
+        int cardsInPlayerField = HowManyCardsByRow(board.transformMeleeRow) + HowManyCardsByRow(board.transformRangedRow) + HowManyCardsByRow(board.transformSeigeRow);
+        int cardsInOppField = HowManyCardsByRow(board.opponentTransformMeleeRow) + HowManyCardsByRow(board.opponentTransformRangedRow) + HowManyCardsByRow(board.opponentTransformSeigeRow);
 
         DisplayCard aux = activingCard.GetComponent<DisplayCard>();
 
@@ -168,85 +152,57 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         {
             if(cardsInOppField > cardsInPlayerField)
             {
-                if(cardsInMelee <= cardsInRanged && cardsInMelee <= cardsInSeige)
+                Transform[] rows = {board.transformMeleeRow, board.transformRangedRow, board.transformSeigeRow};
+                for(int i = 0; i < cardsInOppField - cardsInPlayerField; i++)
                 {
-                    for(int i = 0; i < cardsInOppField - cardsInPlayerField; i++)
-                    {
-                        SummonToken(activingCard, board.transformMeleeRow);
-                    }   
-                }
-                else if(cardsInRanged <= cardsInMelee && cardsInRanged <= cardsInSeige)
-                {
-                    for(int i = 0; i < cardsInOppField - cardsInPlayerField; i++)
-                    {
-                        SummonToken(activingCard, board.transformRangedRow);
-                    }   
-                }
-                else
-                {
-                    for(int i = 0; i < cardsInOppField - cardsInPlayerField; i++)
-                    {
-                        SummonToken(activingCard, board.transformSeigeRow);
-                    }
-                }
+                    int random = UnityEngine.Random.Range(0, rows.Length);
+                    SummonToken(activingCard, rows[random]);
+                }   
             }
         }
         else
         {
             if(cardsInPlayerField > cardsInOppField)
             {
-                if(cardsInOppMelee <= cardsInOppRanged && cardsInOppMelee <= cardsInOppSeige)
+                if(cardsInOppField > cardsInPlayerField)
                 {
-                    for(int i = 0; i < cardsInPlayerField - cardsInOppField; i++)
+                    Transform[] rows = {board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow};
+                    for(int i = 0; i < cardsInOppField - cardsInPlayerField; i++)
                     {
-                        SummonToken(activingCard, board.opponentTransformMeleeRow);
+                        int random = UnityEngine.Random.Range(0, rows.Length);
+                        SummonToken(activingCard, rows[random]);
                     }   
-                }
-                else if(cardsInOppRanged <= cardsInOppMelee && cardsInOppRanged <= cardsInOppSeige)
-                {
-                    for(int i = 0; i < cardsInPlayerField - cardsInOppField; i++)
-                    {
-                        SummonToken(activingCard, board.opponentTransformRangedRow);
-                    }   
-                }
-                else
-                {
-                    for(int i = 0; i < cardsInPlayerField - cardsInOppField; i++)
-                    {
-                        SummonToken(activingCard, board.opponentTransformSeigeRow);
-                    }
                 }
             }
         }
     }
 
     //Kechizu
-    public IEnumerator ReturnCard(GameObject activingCard)
+    public void ReturnCard(GameObject activingCard)
     {
-        yield return board.WaitForSelection<GameObject>
-        (
-            selectedCard =>
+        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
+        if(activingC.card.owner == Card.Owner.Player)
+        {
+            Transform[] rows = {board.transformMeleeRow, board.transformRangedRow, board.transformSeigeRow};
+            List<DisplayCard> cardsToShow = new List<DisplayCard>();
+
+            foreach(Transform t in rows)
             {
-                DisplayCard activingAux = activingCard.GetComponent<DisplayCard>();
-                DisplayCard targedAux = selectedCard.GetComponent<DisplayCard>();
+                foreach(DisplayCard c in GetCards(t, true)) cardsToShow.Add(c);
+            }
+            ShowCardToReturnHand(cardsToShow);
+        }
+        else 
+        {
+            Transform[] rows = {board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow};
+            List<DisplayCard> cardsToShow = new List<DisplayCard>();
 
-                if(activingAux.card.owner == targedAux.card.owner)
-                {
-                    SummonToken(selectedCard, selectedCard.transform.parent);
-
-                    DisplayCard[] tokensInRow = selectedCard.transform.parent.GetComponents<DisplayCard>();
-                    DisplayCard lastToken = tokensInRow[tokensInRow.Length - 1];
-
-                    if(lastToken != null)
-                    {
-                    lastToken.card.SetAttack(0);
-                    }
-
-                    selectedCard.transform.SetParent(board.transformPlayerHand);
-                }
-            },
-            () => board.effectSelectedCard == null
-        );     
+            foreach(Transform t in rows)
+            {
+                foreach(DisplayCard c in GetCards(t, true)) cardsToShow.Add(c);
+            }
+            ShowCardToReturnHand(cardsToShow);
+        }    
     }
 
     //Mahoraga's Ritual effect
@@ -288,56 +244,65 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
     }
 
     //Yuuta Okkotsu's effect
-    public IEnumerator SummonCopy(GameObject activingCard)
+    public void SummonCopy(GameObject activingCard)
     {
-        yield return board.WaitForSelection<GameObject>
-        (
-            selectedCard =>
+        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
+        
+        if(activingC.card.owner == Card.Owner.Player)
+        {
+            Transform[] rows = {board.transformMeleeRow, board.transformRangedRow, board.transformSeigeRow};
+            Transform[] origins = {board.transformDeck, board.transformPlayerHand};
+            List<DisplayCard> cardsToShow = new List<DisplayCard>();
+            List<DisplayCard> cardsToCopy = new List<DisplayCard>();
+
+            foreach(Transform t in rows)
             {
-                DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-                DisplayCard targedC = selectedCard.GetComponent<DisplayCard>();
-                DisplayCard cardToSummon;
-                DisplayCard[] cardsInDeck;
-                DisplayCard[] cardsInHand;
+                foreach(DisplayCard c in GetCards(t, true)) cardsToShow.Add(c);
+            }
+            for(int i = 0; i < cardsToShow.Count; i++)
+            {
+                if(cardsToShow[i].card.isSpecial) cardsToShow.Remove(cardsToShow[i]);
+            }
 
-                if(!targedC.card.isSpecial)
+            foreach(Transform t in origins)
+            {
+                List<DisplayCard> aux = GetCards(t, true); 
+                foreach(DisplayCard c in cardsToShow) 
                 {
-                    if(activingC.card.owner == Card.Owner.Player)
-                    {
-                        cardsInDeck = board.transformDeck.GetComponents<DisplayCard>();
-                        cardsInHand = board.transformPlayerHand.GetComponents<DisplayCard>();
-
-                        if(IsThere(cardsInDeck, targedC))
-                        {
-                            cardToSummon = targedC;
-                            Summon(selectedCard, selectedCard.transform.parent);
-                        }
-                        else if(IsThere(cardsInHand, targedC))
-                        {
-                            cardToSummon = targedC;
-                            Summon(selectedCard, selectedCard.transform.parent);
-                        }
-                    }
-                    else 
-                    {
-                        cardsInDeck = board.opponentTransformDeck.GetComponents<DisplayCard>();
-                        cardsInHand = board.opponentTransformPlayerHand.GetComponents<DisplayCard>();
-
-                        if(IsThere(cardsInDeck, targedC))
-                        {
-                            cardToSummon = targedC;
-                            Summon(selectedCard, selectedCard.transform.parent);
-                        }
-                        else if(IsThere(cardsInHand, targedC))
-                        {
-                            cardToSummon = targedC;
-                            Summon(selectedCard, selectedCard.transform.parent);
-                        }
-                    }
+                    for(int i = 0; i < aux.Count; i ++)
+                    if(c == aux[i]) cardsToCopy.Add(aux[i]);
                 }
-            },
-            () => board.effectSelectedCard == null
-        );     
+            }
+
+            if(cardsToShow.Count != 0) ShowCardSelectionPanel(cardsToCopy);
+        }
+        else 
+        {
+            Transform[] rows = {board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow};
+            Transform[] origins = {board.opponentTransformDeck, board.opponentTransformPlayerHand};
+            List<DisplayCard> cardsToShow = new List<DisplayCard>();
+            List<DisplayCard> cardsToCopy = new List<DisplayCard>();
+
+            foreach(Transform t in rows)
+            {
+                foreach(DisplayCard c in GetCards(t, true)) cardsToShow.Add(c);
+            }
+            for(int i = 0; i < cardsToShow.Count; i++)
+            {
+                if(cardsToShow[i].card.isSpecial) cardsToShow.Remove(cardsToShow[i]);
+            }
+
+            foreach(Transform t in origins)
+            {
+                int i = 0;
+                foreach(DisplayCard c in GetCards(t, true)) 
+                {
+                    if(c == cardsToShow[i]) cardsToCopy.Add(c);
+                }
+            }
+
+            if(cardsToShow.Count != 0) ShowCardSelectionPanel(cardsToCopy);    
+        }
     }
 
     //Saltamontes' curse's effect
@@ -347,9 +312,8 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         DisplayCard[] cardsInDeck;
         DisplayCard[] cardsInHand;
         DisplayCard[] cardsInGra;
-        bool thereIsDeck = false;
-        bool thereIsHand = false;
-        bool thereIsGra = false;
+
+        List<DisplayCard> cardsToSummon = new List<DisplayCard>();
 
         if(activingC.card.owner == Card.Owner.Player)
         {
@@ -357,119 +321,82 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
             cardsInHand = board.transformPlayerHand.GetComponentsInChildren<DisplayCard>();
             cardsInGra = board.transformGraveyard.GetComponentsInChildren<DisplayCard>();
 
-            if(cardsInDeck.Length != 0 && IsThere(cardsInDeck, activingC))
+            if(ThereIsIn(activingC, cardsInDeck))
             {
-                thereIsDeck = true;
+                cardsToSummon.Add(GetCardFrom(cardsInDeck, activingC));
             }
-            if(cardsInHand.Length != 0 && IsThere(cardsInHand, activingC))
+            if(ThereIsIn(activingC, cardsInHand))
             {
-                thereIsHand = true;
+                cardsToSummon.Add(GetCardFrom(cardsInHand, activingC));
             }
-            if(cardsInGra.Length != 0 && IsThere(cardsInGra, activingC))
+            if(ThereIsIn(activingC, cardsInGra))
             {
-                thereIsGra = true;
+                cardsToSummon.Add(GetCardFrom(cardsInGra, activingC));
             }      
 
-            List<string> availableOptions = new List<string>();
-
-            if (thereIsDeck)
-            {
-                availableOptions.Add("Deck");
-            }
-            if (thereIsHand)
-            {
-                availableOptions.Add("Hand");
-            }
-            if (thereIsGra)
-            {
-                availableOptions.Add("Graveyard");
-            }
-
-            if (availableOptions.Count > 0)
-            {
-                ShowInvocationOptions(availableOptions, activingC);
-            }
-            else
-            {
-                Debug.Log("No hay opciones disponibles para invocar la carta.");
-            }
+            if(cardsToSummon.Count != 0) ShowCardSelectionPanel(cardsToSummon);
+            else Debug.Log("No hay opciones disponibles para invocar la carta.");
         }
         //--------------------------------------------------------------
         else 
         {
-            cardsInDeck = board.transformDeck.GetComponentsInChildren<DisplayCard>();
-            cardsInHand = board.transformPlayerHand.GetComponentsInChildren<DisplayCard>();
-            cardsInGra = board.transformGraveyard.GetComponentsInChildren<DisplayCard>();
+            cardsInDeck = board.opponentTransformDeck.GetComponentsInChildren<DisplayCard>();
+            cardsInHand = board.opponentTransformPlayerHand.GetComponentsInChildren<DisplayCard>();
+            cardsInGra = board.opponentTransformGraveyard.GetComponentsInChildren<DisplayCard>();
 
-            if(cardsInDeck.Length != 0 && IsThere(cardsInDeck, activingC))
+            if(ThereIsIn(activingC, cardsInDeck))
             {
-                thereIsDeck = true;
+                cardsToSummon.Add(GetCardFrom(cardsInDeck, activingC));
             }
-            if(cardsInHand.Length != 0 && IsThere(cardsInHand, activingC))
+            if(ThereIsIn(activingC, cardsInHand))
             {
-                thereIsHand = true;
+                cardsToSummon.Add(GetCardFrom(cardsInHand, activingC));
             }
-            if(cardsInGra.Length != 0 && IsThere(cardsInGra, activingC))
+            if(ThereIsIn(activingC, cardsInGra))
             {
-                thereIsGra = true;
+                cardsToSummon.Add(GetCardFrom(cardsInGra, activingC));
             }      
 
-            List<string> availableOptions = new List<string>();
-
-            if (thereIsDeck)
-            {
-                availableOptions.Add("Deck");
-            }
-            if (thereIsHand)
-            {
-                availableOptions.Add("Hand");
-            }
-            if (thereIsGra)
-            {
-                availableOptions.Add("Graveyard");
-            }
-
-            if (availableOptions.Count > 0)
-            {
-                ShowInvocationOptions(availableOptions, activingC);
-            }
-            else
-            {
-                Debug.Log("No hay opciones disponibles para invocar la carta.");
-            }
+            if(cardsToSummon.Count != 0) ShowCardSelectionPanel(cardsToSummon);
+            else Debug.Log("No hay opciones disponibles para invocar la carta.");
         }
     }
 
 //-------Metodos basicos para utilizar en los efectos ----------------------------------------------------------------------------------
-    private void Summon(GameObject card, Transform row)
+    private List<DisplayCard> GetCards(Transform origin, bool b)
     {
-        card.transform.SetParent(row);
-        card.transform.localPosition = Vector3.zero;
-        card.transform.localRotation = Quaternion.identity;
-        card.transform.localScale = Vector3.one;
+        List<DisplayCard> cardsToShow = new List<DisplayCard>();
+        DisplayCard[] cards = origin.GetComponentsInChildren<DisplayCard>();
 
-        DisplayCard cardToSummon = card.GetComponent<DisplayCard>();
-        if (cardToSummon != null)
+        foreach(DisplayCard c in cards)
         {
-            cardToSummon.card.isActivated = true;
-            cardToSummon.SetUp(cardToSummon.card);
+            if(b && c.card.isUnit) cardsToShow.Add(c);
+            else if(!c.card.isUnit) cardsToShow.Add(c);
         }
+        return cardsToShow;
     }
 
-    private bool IsThere(DisplayCard[] cards, DisplayCard cardToLook)
+    private DisplayCard GetCardFrom(DisplayCard[] cards, DisplayCard c)
     {
-        if(cards.Length != 0)
+        foreach(DisplayCard cd in cards)
         {
-            foreach(DisplayCard c in cards)
-            {
-                if(c.card.name.Equals(cardToLook.card.name))
-                {
-                    return true;
-                }
-            }
-            return false;
+            if(cd == c) return cd;
         }
-        else return false;
+        return null;
+    }
+    
+    private void Summon(GameObject cardToSummon, Transform row)
+    {
+        //GameObject cardToSummon = Instantiate(cardPrefabs);
+        cardToSummon.transform.SetParent(row);
+        cardToSummon.transform.localPosition = Vector3.zero;
+        cardToSummon.transform.localRotation = Quaternion.identity;
+        cardToSummon.transform.localScale = Vector3.one;
+
+        DisplayCard c = cardToSummon.GetComponent<DisplayCard>();
+        c.card.isActivated = true;
+        cardToSummon.GetComponent<DisplayCard>().SetUp(c.card);
+        //Destroy(c.gameObject);
     }
     private int HowManyCardsByRow(Transform row)
     {
@@ -477,9 +404,8 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         return cards.Length;
     }
 
-    public void ShowCardSelectionPanel(DisplayCard[] cardsToShow)
+    public void ShowCardSelectionPanel(List<DisplayCard> cardsToShow)
     {
-        //limpiar el contenedor de los botones
         foreach(Transform child in cardListContainer)
         {
             Destroy(child.gameObject);
@@ -488,80 +414,156 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         foreach(DisplayCard c in cardsToShow)
         {
             GameObject buttonObj = Instantiate(cardButtonPrefab, cardListContainer);
-            Button button =buttonObj.GetComponent<Button>();
-            Text buttonText = buttonObj.GetComponentInChildren<Text>();
-            buttonText.text = c.card.name;
-
-            //Añadir evento para que se active la carta al hacer clic
-            button.onClick.AddListener(() => 
+            buttonObj.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => 
             {
-               Summon(c.gameObject, RandomRowCard(c));
-               cardSelectionPanel.SetActive(false); 
+                SummonOn(c); 
             });
+            buttonObj.GetComponent<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(c.card.name);
+            buttonObj.GetComponentInChildren<UnityEngine.UI.Text>().text = " ";
 
             cardSelectionPanel.SetActive(true);
         }
     }
 
-    private Transform RandomRowCard(DisplayCard c)
+    private void SummonOn(DisplayCard card)
     {
-        if(c.card.isUnit)
-        {
-            int random = UnityEngine.Random.Range(0, c.card.GetKind().Length);
-            if(c.card.owner != Card.Owner.Opponent)
-            {
-                if(c.card.GetKind().Equals("M")) return board.transformMeleeRow;
-                else if(c.card.GetKind().Equals("R")) return board.transformRangedRow;
-                else return board.transformSeigeRow;
-            }
-            else 
-            {
-                if(c.card.GetKind().Equals("M")) return board.opponentTransformMeleeRow;
-                else if(c.card.GetKind().Equals("R")) return board.opponentTransformRangedRow;
-                else return board.opponentTransformSeigeRow;
-            }
-        }
-        else return null;
+        Transform row = RandomRowCard(card);
+
+        Summon(card.gameObject, row);
+
+        cardSelectionPanel.SetActive(false);
     }
 
-    private void ShowInvocationOptions(List<string> options, DisplayCard activingC)
+    private void ShowCardToReturnHand(List<DisplayCard> cards)
     {
         foreach(Transform child in cardListContainer)
         {
             Destroy(child.gameObject);
         }
 
-        foreach (string option in options)
+        foreach(DisplayCard c in cards)
         {
-            GameObject buttonObj = Instantiate(cardButtonPrefab, cardListContainer);
-            Button button = buttonObj.GetComponent<Button>();
-            Text buttonText = buttonObj.GetComponentInChildren<Text>();
-            buttonText.text = option;
-
-            // Añadir evento de clic al botón para manejar la invocación según la opción seleccionada
-            button.onClick.AddListener(() =>
-            {
-                switch (option)
-                {
-                    case "Deck":
-                        if(activingC.card.owner == Card.Owner.Player) Summon(activingC.gameObject, board.transformDeck);
-                        else Summon(activingC.gameObject, board.opponentTransformDeck);
-                        break;
-                    case "Hand":
-                        if(activingC.card.owner == Card.Owner.Player) Summon(activingC.gameObject, board.transformPlayerHand);
-                        else Summon(activingC.gameObject, board.opponentTransformPlayerHand);
-                        break;
-                    case "Graveyard":
-                        if(activingC.card.owner == Card.Owner.Player) Summon(activingC.gameObject, board.transformGraveyard);
-                        else Summon(activingC.gameObject, board.opponentTransformGraveyard);
-                        break;
-                }
-                cardSelectionPanel.SetActive(false);
-            });
-
-            cardSelectionPanel.SetActive(true);
+            GameObject cardB = Instantiate(cardButtonPrefab, cardListContainer);
+            cardB.GetComponent<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(c.card.name);
+            //cardB.GetComponent<UnityEngine.UI.Text>().text = " ";
+            cardB.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => ReturnCardToHandPlayer(c));
         }
+        cardSelectionPanel.SetActive(true);
     }
+
+    private void ReturnCardToHandPlayer(DisplayCard c)
+    {
+        TokenForCard(c, c.transform.parent);
+        if(c.card.owner == Card.Owner.Player) ReturnCardToHand(c.gameObject, board.transformPlayerHand);
+        else ReturnCardToHand(c.gameObject, board.opponentTransformPlayerHand);
+    }
+
+    private void ReturnCardToHand(GameObject cardToReturn, Transform hand)
+    {
+        //GameObject cardToReturn = Instantiate(cardPrefabs);
+        //DisplayCard c = cardToReturn.GetComponent<DisplayCard>();
+        if(hand.childCount >= 10 && hand == board.transformPlayerHand) cardToReturn.transform.SetParent(board.transformGraveyard);
+        else if(hand.childCount >= 10 && hand == board.opponentTransformPlayerHand) cardToReturn.transform.SetParent(board.opponentTransformGraveyard);
+        else cardToReturn.transform.SetParent(hand);
+
+        cardToReturn.transform.localScale = Vector3.one;
+        cardToReturn.transform.localPosition = Vector3.zero;
+        cardToReturn.transform.localRotation = Quaternion.identity;
+        //cardToReturn.GetComponent<DisplayCard>().card = c.card;
+        //cardToReturn.GetComponent<DisplayCard>().SetUp(c.card);
+        cardSelectionPanel.SetActive(false);
+
+    }
+    private void TokenForCard(DisplayCard c, Transform rowParent)
+    {
+        int randomIndex = UnityEngine.Random.Range(0, CardDataBase.tokenData.Count);
+        Card tokenCardToSummon = CardDataBase.tokenData[randomIndex];
+
+        GameObject token = Instantiate(cardPrefabs, rowParent);
+        
+        token.transform.localScale = Vector3.one;
+        token.transform.localPosition = Vector3.zero;
+        token.transform.localRotation = Quaternion.identity;
+
+        DisplayCard tokenCard = token.GetComponent<DisplayCard>();
+        
+        if(tokenCard != null)
+        {
+            tokenCard.card = tokenCardToSummon;
+            tokenCard.card.SetAttack(0);
+            tokenCard.card.isActivated = true;
+            tokenCard.SetUp(tokenCard.card);
+        }
+        if(tokenCard.gameObject.GetComponent<CardLogic>() == null)
+        {
+            tokenCard.gameObject.GetComponent<CardLogic>();
+        }
+
+        tokenCard.card.owner = c.card.owner;
+
+        cardSelectionPanel.SetActive(false); 
+        //Destroy(c.gameObject);
+    }
+
+    private Transform RandomRowCard(DisplayCard c)
+    {
+        if(c.card.isUnit)
+        {
+            int random = UnityEngine.Random.Range(0, 3);
+            if(c.card.owner != Card.Owner.Opponent)
+            {
+                if(c.card.GetKind()[random].Equals("M")) return board.transformMeleeRow;
+                else if(c.card.GetKind()[random].Equals("R")) return board.transformRangedRow;
+                else return board.transformSeigeRow;
+            }
+            else 
+            {
+                if(c.card.GetKind()[random].Equals("M")) return board.opponentTransformMeleeRow;
+                else if(c.card.GetKind()[random].Equals("R")) return board.opponentTransformRangedRow;
+                else return board.opponentTransformSeigeRow;
+            }
+        }
+        else return null;
+    }
+
+    // private void ShowInvocationOptions(List<string> options, DisplayCard activingC)
+    // {
+    //     foreach(Transform child in cardListContainer)
+    //     {
+    //         Destroy(child.gameObject);
+    //     }
+
+    //     foreach (string option in options)
+    //     {
+    //         GameObject buttonObj = Instantiate(cardButtonPrefab, cardListContainer);
+    //         Button button = buttonObj.GetComponent<Button>();
+    //         Text buttonText = buttonObj.GetComponentInChildren<Text>();
+    //         buttonText.text = option;
+
+    //         // Añadir evento de clic al botón para manejar la invocación según la opción seleccionada
+    //         button.onClick.AddListener(() =>
+    //         {
+    //             switch (option)
+    //             {
+    //                 case "Deck":
+    //                     if(activingC.card.owner == Card.Owner.Player) Summon(activingC.gameObject, board.transformDeck);
+    //                     else Summon(activingC.gameObject, board.opponentTransformDeck);
+    //                     break;
+    //                 case "Hand":
+    //                     if(activingC.card.owner == Card.Owner.Player) Summon(activingC.gameObject, board.transformPlayerHand);
+    //                     else Summon(activingC.gameObject, board.opponentTransformPlayerHand);
+    //                     break;
+    //                 case "Graveyard":
+    //                     if(activingC.card.owner == Card.Owner.Player) Summon(activingC.gameObject, board.transformGraveyard);
+    //                     else Summon(activingC.gameObject, board.opponentTransformGraveyard);
+    //                     break;
+    //             }
+    //             cardSelectionPanel.SetActive(false);
+    //         });
+
+    //         cardSelectionPanel.SetActive(true);
+    //     }
+    // }
 
     private DisplayCard MaxAttackCard(Transform Row)
     {
@@ -608,18 +610,27 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         }
     }
 
-    private DisplayCard FindCardByName(string cardName, Transform row)
+    private bool ThereIsIn(DisplayCard c, DisplayCard[] cards)
     {
-        DisplayCard[] cards = row.GetComponentsInChildren<DisplayCard>();
-
         foreach (DisplayCard card in cards)
         {
-            if (card.card.name.Equals(cardName))
+            if (card == c)
             {
-                return card;
+                return true;
             }
         }
-        return null; 
+        return false; 
+    }
+
+    private DisplayCard FindCardByName(string cardName, Transform t)
+    {
+        DisplayCard[] aux = t.GetComponentsInChildren<DisplayCard>();
+
+        foreach(DisplayCard c in aux)
+        {
+            if(c.card.name.Equals(cardName)) return c;
+        }
+        return null;
     }
 }
 

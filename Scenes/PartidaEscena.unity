@@ -2290,6 +2290,7 @@ MonoBehaviour:
   cardPrefabs: {fileID: 6522575827237403951, guid: 75d20380559600e4c801d459d5cef116, type: 3}
   card: {fileID: 0}
   board: {fileID: 0}
+  cardEffect: {fileID: 623687937}
 --- !u!1 &654855835
 GameObject:
   m_ObjectHideFlags: 0

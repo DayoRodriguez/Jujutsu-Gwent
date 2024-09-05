@@ -12,7 +12,7 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
 
     public GameObject card;
     public BoardManager board;
-    private CardEffects cardEffect;
+    public CardEffects cardEffect;
 
     public void Execute(GameObject activingCard)
     {
@@ -66,7 +66,7 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
         }
     }
 
-    public void ActiveCard(Transform originRow, string typeCard)
+    public void ActiveCard(DisplayCard activingC, Transform originRow, string typeCard)
     {
         DisplayCard[] cards = originRow.GetComponentsInChildren<DisplayCard>();
         List<DisplayCard> cardsToChoose = new List<DisplayCard>();
@@ -84,6 +84,10 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
 
             if(cardsToChoose.Count != 0)
             {
+                foreach(DisplayCard c in cardsToChoose)
+                {
+                    c.card.owner = activingC.card.owner;
+                }
                 ShowCardSelectionPanel(cardsToChoose);
             }
             else
@@ -124,16 +128,15 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
         ?board.GetPlayerRowForCard(c) 
         :board.GetOpponentRowForCard(c);
 
-        GameObject cardObject = Instantiate(cardPrefabs);
-
-        cardObject.transform.SetParent(destinationRow);
-        cardObject.transform.localScale = Vector3.one;
-        cardObject.transform.localPosition = Vector3.zero;
-        cardObject.transform.localRotation = Quaternion.identity;
+        c.gameObject.transform.SetParent(destinationRow);
+        c.gameObject.transform.localScale = Vector3.one;
+        c.gameObject.transform.localPosition = Vector3.zero;
+        c.gameObject.transform.localRotation = Quaternion.identity;
         
         c.card.isActivated = true;
-        cardObject.GetComponent<DisplayCard>().SetUp(c.card);  
+        c.SetUp(c.card);  
 
+        cardEffect.Excute(c.gameObject);
     }
 
 
@@ -144,11 +147,11 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
 
         if(activingC.card.owner == Card.Owner.Player)
         {
-            ActiveCard(board.transformDeck, "Increase");
+            ActiveCard(activingC, board.transformDeck, "Increase");
         }
         else 
         {
-            ActiveCard(board.opponentTransformDeck, "Increase");            
+            ActiveCard(activingC, board.opponentTransformDeck, "Increase");            
         }
     }
 
@@ -159,11 +162,11 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
 
         if(activingC.card.owner == Card.Owner.Player)
         {
-            ActiveCard(board.transformPlayerHand, "Climate");
+            ActiveCard(activingC, board.transformPlayerHand, "Climate");
         }
         else 
         {
-            ActiveCard(board.opponentTransformPlayerHand, "Climate");
+            ActiveCard(activingC, board.opponentTransformPlayerHand, "Climate");
         }
     }
 

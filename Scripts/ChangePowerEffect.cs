@@ -512,6 +512,21 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     }
 
     //======Metodos Basicos para utilizar en los effectos=============================
+    private List<DisplayCard> GetCards(Transform t, bool b)
+    {
+        List<DisplayCard> cardsToChangePower = new List<DisplayCard>();
+        DisplayCard[] cards = t.GetComponentsInChildren<DisplayCard>();
+
+        foreach(DisplayCard c in cards)
+        {
+            if(b && c.card.isUnit) cardsToChangePower.Add(c);
+            else if(!c.card.isUnit) cardsToChangePower.Add(c);
+        }
+        
+        return cardsToChangePower;
+    }
+
+    
     private void DivideAttack(Transform Row, int count)
     {
         DisplayCard[] cards = Row.GetComponentsInChildren<DisplayCard>();
