@@ -5,6 +5,11 @@ using System;
 
 public class DestroyCardEffect : MonoBehaviour , ICardEffect
 {
+    public GameObject cardSelectionPanel;  // Panel que contendrá las cartas
+    public GameObject cardButtonPrefab;    // Prefab de un botón para cada carta
+    public Transform cardListContainer;
+    public GameObject cardPrefabs;
+
     public GameObject auxCard;
     public BoardManager board;
     private CardEffects cardEffect;
@@ -22,22 +27,27 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
             case "DespliegueDominio" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 DespliegueDominio(activingCard);
+                EndEffect(activingCard);
                 break;
             case "DestroyMaxAttack" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 DestroyMaxAttack(activingCard);
+                EndEffect(activingCard);
                 break;    
             case "DestroyLessAttack" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 DestroyLessAttack(activingCard);
+                EndEffect(activingCard);
                 break;  
             case "MaxPowerOut" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 MaxPowerOut();
+                EndEffect(activingCard);
                 break;
             case "GreatVoid" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 GreatVoid(activingCard);
+                EndEffect(activingCard);
                 break;        
             default :
                 break;    
@@ -64,7 +74,7 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
 
-        if(!activingC.card.isUnit && (activingC.card.GetKind()[0] == "Increase"))
+        if(!activingC.card.isUnit && (activingC.card.GetKind()[0] == "Increase" || activingC.card.GetKind()[0] == "Dump"))
         {
             Transform grav = activingC.card.owner == Card.Owner.Player ? board.transformGraveyard : board.opponentTransformGraveyard;
             board.CleanRow(activingCard.transform.parent, grav);
@@ -72,27 +82,26 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
     }
 
     //Despliegue de Dominio's effect
-    public IEnumerator DespliegueDominio(GameObject activingCard)
+    public void DespliegueDominio(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
 
         //if(activingC.card.owner == Card.Owner.Player)
         //{
-            if(ThereIs(board.transformWeatherMeleeSlot) || ThereIs(board.transformWeatherRangedSlot) || ThereIs(board.transformWeatherSeigeSlot)
-            || ThereIs(board.opponentTransformWeatherMeleeSlot) || ThereIs(board.opponentTransformWeatherRangedSlot) || ThereIs(board.opponentTransformWeatherSeigeSlot))
+            if(board.transformWeatherMeleeSlot.childCount != 0 || board.transformWeatherRangedSlot.childCount != 0 || board.transformWeatherSeigeSlot.childCount != 0
+            || board.opponentTransformWeatherMeleeSlot.childCount != 0 || board.opponentTransformWeatherRangedSlot.childCount != 0 || board.opponentTransformWeatherSeigeSlot.childCount != 0)
             {
-                yield return board.WaitForSelection<GameObject>
-                (
-                    selectedCard => 
+                List<DisplayCard> climateCard = new List<DisplayCard>();
+                Transform[] weatherRows = {board.transformWeatherMeleeSlot, board.transformWeatherRangedSlot, board.transformWeatherSeigeSlot,
+                                            board.opponentTransformWeatherMeleeSlot, board.opponentTransformWeatherRangedSlot, board.opponentTransformWeatherSeigeSlot};
+                foreach(Transform t in weatherRows)
+                {
+                    if(t.GetComponentsInChildren<DisplayCard>().Length != 0)
                     {
-                        auxCard = selectedCard;
-                        if(auxCard != null)
-                        {
-                            DestroyCard(auxCard);
-                        }
-                    },
-                    () => board.effectSelectedCard == null
-                );
+                        AddCardToList(t, climateCard);
+                    }
+                }
+                if(climateCard.Count != 0) ShowCardToDestroy(climateCard);                    
             }
         //}
         // else
@@ -151,7 +160,9 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
         DisplayCard maxCard = GetMaxCard(maxCardMelee, GetMaxCard(maxCardRanged, maxCardSeige));
         DisplayCard maxOppCard = GetMaxCard(maxCardOppMelee, GetMaxCard(maxCardOppRanged, maxCardOppSeige));
 
-        if(maxCard.card.GetPower() > maxOppCard.card.GetPower())
+        if(maxCard != null && maxOppCard == null) DestroyCard(maxCard.gameObject);
+        else if(maxCard == null && maxOppCard != null) DestroyCard(maxOppCard.gameObject);
+        else if(maxCard.card.GetPower() > maxOppCard.card.GetPower())
         {
             DestroyCard(maxCard.gameObject);
         }
@@ -207,7 +218,7 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
 
         if(activingC.card.owner == Card.Owner.Player)
         {
-            DisplayCard liderC = board.transformLeaderCardSlot.GetComponent<DisplayCard>();
+            DisplayCard liderC = board.transformLeaderCardSlot.GetComponentInChildren<DisplayCard>();
 
             if(!liderC.card.name.Equals("Satoru Gojo"))
             {
@@ -221,7 +232,7 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
         }
         else
         {
-            DisplayCard liderC = board.opponentTransformLeaderCardSlot.GetComponent<DisplayCard>();
+            DisplayCard liderC = board.opponentTransformLeaderCardSlot.GetComponentInChildren<DisplayCard>();
 
             if(!liderC.card.name.Equals("Satoru Gojo"))
             {
@@ -236,13 +247,13 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
     }
 
     //--------Metodos Basicos para utilizar en los efectos------------------------------------------------------------
-    private bool ThereIs(Transform Row)
-    {
-        DisplayCard[] cards = Row.GetComponentsInChildren<DisplayCard>();
+    // private bool ThereIs(Transform Row)
+    // {
+    //     DisplayCard[] cards = Row.GetComponentsInChildren<DisplayCard>();
         
-        if(cards.Length != 0) return true;
-        else return false;
-    }
+    //     if(cards.Length != 0) return true;
+    //     else return false;
+    // }
 
     private DisplayCard MaxAttackCard(Transform Row)
     {
@@ -387,5 +398,26 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
         {
             cards.Add(c);
         }
+    }
+
+    private void ShowCardToDestroy(List<DisplayCard> cardsToAdd)
+    {
+        foreach(Transform child in cardListContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        foreach(DisplayCard c in cardsToAdd)
+        {
+            GameObject cardB = Instantiate(cardButtonPrefab, cardListContainer);
+            cardB.GetComponent<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(c.card.name);
+            cardB.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() =>
+            {
+                DestroyCard(c.gameObject);
+                cardSelectionPanel.SetActive(false);
+            });
+        }
+        
+        cardSelectionPanel.SetActive(true);
     }
 }

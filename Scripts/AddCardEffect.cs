@@ -123,14 +123,14 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
             Destroy(child.gameObject);
         }
 
-        cardSelectionPanel.SetActive(true);
-
         foreach(DisplayCard c in cardsToAdd)
         {
             GameObject cardB = Instantiate(cardButtonPrefab, cardListContainer);
             cardB.GetComponent<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(c.card.name);
             cardB.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => OnCardSelected(c));
         }
+        
+        cardSelectionPanel.SetActive(true);
     }
     private void OnCardSelected(DisplayCard selectedC)
     {

@@ -2196,8 +2196,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c37ba3fff56778a4c9fae20e7155ee14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cardSelectionPanel: {fileID: 1049357712}
+  cardButtonPrefab: {fileID: 2696545424932650561, guid: 94c72c9fc7f78ef4fb0ac993b4ab609a, type: 3}
+  cardListContainer: {fileID: 2002362627}
+  cardPrefabs: {fileID: 6522575827237403951, guid: 75d20380559600e4c801d459d5cef116, type: 3}
   card: {fileID: 0}
   board: {fileID: 0}
+  effectRow: {fileID: 0}
 --- !u!114 &623687939
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2241,6 +2246,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62c0a416b290fb74abe15f528534cd84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cardSelectionPanel: {fileID: 1049357712}
+  cardButtonPrefab: {fileID: 2696545424932650561, guid: 94c72c9fc7f78ef4fb0ac993b4ab609a, type: 3}
+  cardListContainer: {fileID: 2002362627}
+  cardPrefabs: {fileID: 6522575827237403951, guid: 75d20380559600e4c801d459d5cef116, type: 3}
   auxCard: {fileID: 0}
   board: {fileID: 0}
 --- !u!114 &623687942
@@ -2255,6 +2264,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d00452b2d08d4724aa8dbd16983a1b07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cardSelectionPanel: {fileID: 1049357712}
+  cardButtonPrefab: {fileID: 2696545424932650561, guid: 94c72c9fc7f78ef4fb0ac993b4ab609a, type: 3}
+  cardListContainer: {fileID: 2002362627}
+  cardPrefabs: {fileID: 6522575827237403951, guid: 75d20380559600e4c801d459d5cef116, type: 3}
 --- !u!114 &623687943
 MonoBehaviour:
   m_ObjectHideFlags: 0

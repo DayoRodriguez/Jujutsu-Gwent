@@ -4,6 +4,11 @@ using UnityEngine;
 using System;
 public class ChangePowerEffect : MonoBehaviour , ICardEffect
 {
+    public GameObject cardSelectionPanel;  // Panel que contendrá las cartas
+    public GameObject cardButtonPrefab;    // Prefab de un botón para cada carta
+    public Transform cardListContainer;
+    public GameObject cardPrefabs;
+
     private GameObject activeCard;
     private BoardManager board;
     private Transform selectedRow;
@@ -11,77 +16,59 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
 
     private CardEffects cardEffect;
 
+    void Start()
+    {
+        board = FindObjectOfType<BoardManager>();
+    } 
     public void Execute(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-
-        Initialize();
-        //cardEffect = FindObjectOfType<CardEffects>();
-
-        //activingCard = cardEffect.activingCard;
-
-        StartCoroutine(HandleEffectExecution(activingC, activingCard));
-    }
-
-    private IEnumerator HandleEffectExecution(DisplayCard activingC, GameObject activingCard)
-    {
-        bool needRowSelection = cardEffect.NeedsRowSelection();
-        bool needCardSelection = cardEffect.NeedsCardSelection();
-
-        if(needRowSelection)
-        {
-            bool rowSelected = false;
-            board.SelectionRowIfNeeded(row =>
-            {
-                selectedRow = row;
-                rowSelected = true;
-            });
-            while(!rowSelected)
-            {
-                yield return null;
-            }
-        }
-
-        if(needCardSelection)
-        {
-            bool cardSelected = false;
-            board.SelectionCardIfNeeded(card => 
-            {
-                selectedCard = card;
-                cardSelected = true;
-            });
-            while(!cardSelected)
-            {
-                yield return null;
-            }
-        }
 
         switch(activingC.card.effect)
         {
             case "ReduceByFive" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                ModifyRowByPower(selectedRow, activingCard, (c, actPower) => c.card.SetAttack(c.card.GetPower() - 5), 
-                "La Seleccionada no es valida, Vuelva a intentarlo");
+                ShowRowsToSelectd(activingC);
                 break;
             case "ChangeToLower" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                ApplyToRow(selectedRow, ChangeToLower);
+                ShowRowsToSelectd(activingC);
                 break;
             case "Absorption" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                Absorption(activingCard);
+                List<DisplayCard> cardsToAbs = GetCardsTo(activingC);
+                if(cardsToAbs.Count != 0) ShowCardsToChange(cardsToAbs, activingC);
+                Absorption(activingCard, selectedCard);
                 break;        
             case "ReducerCourt" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                ReducerCourt(selectedCard);
+                List<DisplayCard> cardsToCurt = GetCardsTo(activingC);
+                if(cardsToCurt.Count != 0) ShowCardsToChange(cardsToCurt, activingC);
+                //ReducerCourt(selectedCard);
                 break;
             case "ChangeToAverage" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                ApplyToAllRows(ChangeToAverage);
+                List<DisplayCard> cardsToAverage = new List<DisplayCard>();
+                Transform[] field = {board.transformMeleeRow, board.transformRangedRow, board.transformSeigeRow
+                                    ,board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow};
+                foreach(Transform t in field)
+                {
+                    DisplayCard[] auxCards = t.GetComponentsInChildren<DisplayCard>();
+                    if(auxCards.Length != 0)
+                    {
+                        for(int i = 0; i < auxCards.Length; i++)
+                        {
+                            cardsToAverage.Add(auxCards[i]);
+                        }
+                    }
+                }
+                if(cardsToAverage.Count != 0) ShowCardsToChange(cardsToAverage, activingC);
                 break;
             case "SoulMutation" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                SoulMutation(selectedCard, UnityEngine.Random.Range(0,21));
+                List<DisplayCard> cardsToMute = GetCardsTo(activingC);
+                if(cardsToMute.Count != 0) ShowCardsToChange(cardsToMute, activingC);
+                //SoulMutation(selectedCard, UnityEngine.Random.Range(0,21));
                 break;            
             case "BloodManipulation" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
@@ -89,12 +76,14 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 break;
             case "Vudu" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                Vudu(activingCard, selectedCard);
+                List<DisplayCard> cardsToVudu = GetCardsTo(activingC);
+                if(cardsToVudu.Count != 0) ShowCardsToChange(cardsToVudu, activingC);
+                //Vudu(activingCard, selectedCard);
                 break;
             case "IncreaseAttackByTwo" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
-                ModifyRowByPower(selectedRow, activingCard, (c, actPower) => c.card.SetAttack(c.card.GetPower() + 2), 
-                "La fila seleccionada no es valida, Vuelva a intentarlo");
+                ShowRowsToSelectd(activingC);
+                IncreaseAttackByTwo(selectedRow);
                 break;            
             case "TempleEvil" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
@@ -109,7 +98,7 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
 
     public void Initialize()
     {
-       board = FindObjectOfType<BoardManager>();
+       
     }
 
     public void ShowMessagePanel(string sms)
@@ -145,47 +134,67 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     //Jogo's effect
     public void ReduceByFive(GameObject activingCard, Transform row)
     {
-        ModifyRowByPower(row, activingCard, (c, actPower) => c.card.SetAttack(c.card.GetPower() - 5), "La seleccion no es valida vuelva a intentarlo");
+        DisplayCard[] cardsToReduce = row.GetComponentsInChildren<DisplayCard>();
+        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
+
+        if(cardsToReduce.Length != 0)
+        {
+            foreach(DisplayCard c in cardsToReduce)
+            {
+                if(c.card.GetPower() <= activingC.card.GetPower())
+                {
+                    c.card.SetAttack(c.card.GetPower() - 5);
+                    if(c.card.GetPower() <= 0)
+                    {
+                        Transform aux = c.card.owner == Card.Owner.Player ? board.transformGraveyard : board.opponentTransformGraveyard;
+                        c.gameObject.transform.SetParent(aux);
+                        c.gameObject.transform.localScale = Vector3.one;
+                        c.gameObject.transform.localPosition = Vector3.zero;
+                        c.gameObject.transform.localRotation = Quaternion.identity;
+                    }
+                }
+            }
+        }
+        
+        //ModifyRowByPower(row, activingCard, (c, actPower) => c.card.SetAttack(c.card.GetPower() - 5), "La seleccion no es valida vuelva a intentarlo");
     }
 
     //AutoEncarnacion de la Perfeccion's effect
-    public void ChangeToLower(DisplayCard[] cards)
+    public void ChangeToLower(Transform t)
     {
-        int lessAttack = int.MaxValue;
-        foreach( DisplayCard c in cards)
+        DisplayCard[] cards = t.GetComponentsInChildren<DisplayCard>();
+        if(cards.Length != 0)
         {
-            lessAttack = Math.Min(lessAttack, c.card.GetPower());
-        }
-        foreach(DisplayCard c in cards)
-        {
-            c.card.SetAttack(lessAttack);
+            int lessAttack = int.MaxValue;
+            foreach( DisplayCard c in cards)
+            {
+                lessAttack = Math.Min(lessAttack, c.card.GetPower());
+            }
+            foreach(DisplayCard c in cards)
+            {
+                c.card.SetAttack(lessAttack);
+            }
         }
     }
 
     //Hanami's Effect
-    public IEnumerator Absorption(GameObject activingCard)
+    public void Absorption(GameObject activingCard, GameObject selectedCard)
     {
-        yield return board.WaitForSelection<GameObject>
-        (
-            seletedCard => {
+        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
+        DisplayCard targedC = selectedCard.GetComponent<DisplayCard>();
 
-                DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-                DisplayCard targedC = selectedCard.GetComponent<DisplayCard>();
-
-                if(targedC != null && activingC != null && targedC.card.isUnit && activingC.card.isUnit)
-                {
-                    int absorpbedAttack = targedC.card.GetPower();
-                    targedC.card.SetAttack(0);
-                    activingC.card.SetAttack(activingC.card.GetPower() + absorpbedAttack);
-                }
-                else
-                {
-                    ShowMessagePanel("La carta seleccionada no es valida");
-                } 
-                
-            },
-            () => board.effectSelectedCard == null
-        );
+        if(targedC != null && activingC != null && targedC.card.isUnit && activingC.card.isUnit)
+        {
+            int absorpbedAttack = targedC.card.GetPower();
+            targedC.card.SetAttack(0);
+            Debug.Log("La carta seleccionada tiene" + targedC.card.GetPower());
+            activingC.card.SetAttack(activingC.card.GetPower() + absorpbedAttack);
+            Debug.Log(activingC.card.GetPower());
+        }
+        else
+        {
+            ShowMessagePanel("La carta seleccionada no es valida");
+        } 
     }
 
     //Nanami's Effect
@@ -194,6 +203,7 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         int reduction = UnityEngine.Random.Range(1,8);
         DisplayCard targedC = targedCard.GetComponent<DisplayCard>();
         targedC.card.SetAttack(targedC.card.GetPower() - reduction);
+        Debug.Log(targedC.card.GetPower());
         if(targedC.card.GetPower() <= 5)
         {
             if(targedC.card.owner == Card.Owner.Player)
@@ -215,19 +225,37 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     }
 
     //Mecamaru's effect
-    public void ChangeToAverage(DisplayCard[] cards)
+    public void ChangeToAverage(DisplayCard activinC, DisplayCard targedC)
     {
-        int totalPower = 0;
-        foreach (var c in cards)
+        if(activinC.card.owner == Card.Owner.Player)
         {
-            totalPower += c.card.GetPower();
+            Transform[] rivalRows = GetRows(false);
+            int average = 0;
+            int count = 0;
+            foreach(Transform t in rivalRows)
+            {
+                foreach(DisplayCard c in GetCards(t, true))
+                {
+                    average += c.card.GetPower();
+                    count++;
+                }
+            }
+            if(count != 0) targedC.card.SetAttack(average/count);
         }
-
-        int averagePower = cards.Length > 0 ? totalPower / cards.Length : 0;
-
-        foreach (var c in cards)
+        else 
         {
-            c.card.SetAttack(averagePower);
+            Transform[] rivalRows = GetRows(true);
+            int average = 0;
+            int count = 0;
+            foreach(Transform t in rivalRows)
+            {
+                foreach(DisplayCard c in GetCards(t, true))
+                {
+                    average += c.card.GetPower();
+                    count++;
+                }
+            }
+            if(count != 0) targedC.card.SetAttack(average/count);
         }
     }
 
@@ -238,6 +266,7 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         if(targedC != null && 0 <= attackChange && attackChange <= 20)
         {
             targedC.card.SetAttack(attackChange);
+            Debug.Log(targedC.card.GetPower());
         }
     }
 
@@ -357,10 +386,12 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     public void IncreaseAttackByTwo(Transform Row)
     {
         DisplayCard[] cards = Row.GetComponentsInChildren<DisplayCard>();
-
-        foreach(DisplayCard c in cards)
+        if(cards.Length != 0)
         {
-            c.card.SetAttack(c.card.GetPower() + 2);
+            foreach(DisplayCard c in cards)
+            {
+                c.card.SetAttack(c.card.GetPower() + 2);
+            }
         }
     }
 
@@ -388,18 +419,21 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
             int oppRangedSum = CalculateSum(board.opponentTransformRangedRow);
             int oppSeigeSum = CalculateSum(board.opponentTransformSeigeRow);
 
+            int maxRowPlayer = Math.Max(meleeSum, Math.Max(rangedSum, seigeSum));
+            int maxRowOpp = Math.Max(oppMeleeSum, Math.Max(oppRangedSum, oppSeigeSum));
+
             DisplayCard[] greatSumRow;
             DisplayCard[] greatOppSumRow;
 
             Transform greatRow;
             Transform greatOppRow;
 
-            if(meleeSum >= rangedSum && meleeSum >= seigeSum)
+            if(meleeSum == maxRowPlayer)
             {
                 greatSumRow = board.transformMeleeRow.GetComponents<DisplayCard>();
                 greatRow = board.transformMeleeRow;
             }  
-            else if(rangedSum >= meleeSum && rangedSum >= seigeSum)
+            else if(rangedSum == maxRowPlayer)
             {
                 greatSumRow = board.transformRangedRow.GetComponents<DisplayCard>();
                 greatRow = board.transformRangedRow;
@@ -410,12 +444,12 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 greatRow = board.transformSeigeRow;
             }
             //-------------
-            if(oppMeleeSum >= oppRangedSum && oppMeleeSum >= oppSeigeSum)
+            if(oppMeleeSum == maxRowOpp)
             {
                 greatOppSumRow = board.opponentTransformMeleeRow.GetComponents<DisplayCard>();
                 greatOppRow = board.opponentTransformMeleeRow;
             }  
-            else if(oppRangedSum >= oppMeleeSum && oppRangedSum >= oppSeigeSum)
+            else if(oppRangedSum == maxRowOpp)
             {
                 greatOppSumRow = board.opponentTransformRangedRow.GetComponents<DisplayCard>();
                 greatOppRow = board.opponentTransformRangedRow;
@@ -448,18 +482,21 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
             int oppRangedSum = CalculateSum(board.opponentTransformRangedRow);
             int oppSeigeSum = CalculateSum(board.opponentTransformSeigeRow);
 
+            int maxRowPlayer = Math.Max(meleeSum, Math.Max(rangedSum, seigeSum));
+            int maxRowOpp = Math.Max(oppMeleeSum, Math.Max(oppRangedSum, oppSeigeSum));
+
             DisplayCard[] greatSumRow;
             DisplayCard[] greatOppSumRow;
 
             Transform greatRow;
             Transform greatOppRow;
 
-            if(meleeSum >= rangedSum && meleeSum >= seigeSum)
+            if(meleeSum == maxRowPlayer)
             {
                 greatSumRow = board.transformMeleeRow.GetComponents<DisplayCard>();
                 greatRow = board.transformMeleeRow;
             }  
-            else if(rangedSum >= meleeSum && rangedSum >= seigeSum)
+            else if(rangedSum == maxRowPlayer)
             {
                 greatSumRow = board.transformRangedRow.GetComponents<DisplayCard>();
                 greatRow = board.transformRangedRow;
@@ -470,12 +507,12 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 greatRow = board.transformSeigeRow;
             }
             //-------------
-            if(oppMeleeSum >= oppRangedSum && oppMeleeSum >= oppSeigeSum)
+            if(oppMeleeSum == maxRowOpp)
             {
                 greatOppSumRow = board.opponentTransformMeleeRow.GetComponents<DisplayCard>();
                 greatOppRow = board.opponentTransformMeleeRow;
             }  
-            else if(oppRangedSum >= oppMeleeSum && oppRangedSum >= oppSeigeSum)
+            else if(oppRangedSum == maxRowOpp)
             {
                 greatOppSumRow = board.opponentTransformRangedRow.GetComponents<DisplayCard>();
                 greatOppRow = board.opponentTransformRangedRow;
@@ -526,6 +563,133 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         return cardsToChangePower;
     }
 
+    private Transform[] GetRows(bool b)
+    {
+        if(b) return new Transform[] {board.transformMeleeRow, board.transformRangedRow, board.transformSeigeRow};
+        else return new Transform[] {board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow};
+    }
+
+    private void ShowCardsToChange(List<DisplayCard> cards, DisplayCard activingC)
+    {
+        foreach(Transform t in cardListContainer)
+        {
+            Destroy(t.gameObject);
+        }
+
+        foreach(DisplayCard c in cards)
+        {
+            GameObject buttonCard =Instantiate(cardButtonPrefab, cardListContainer);
+            buttonCard.GetComponent<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(c.card.name);
+            buttonCard.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() =>
+            {
+                //selectedCard = c.gameObject;
+                ActiveEffect(activingC, c.gameObject);
+                cardSelectionPanel.SetActive(false);        
+            });
+        }
+        cardSelectionPanel.SetActive(true);
+    }
+
+    private void ActiveEffect(DisplayCard c, GameObject g)
+    {
+        switch(c.card.name)
+        {
+            case "Kento Nanami":
+                ReducerCourt(g);
+                break;
+            case "Mahito":
+                SoulMutation(g, UnityEngine.Random.Range(0, 21));
+                break;
+            case "Hanami":
+                Absorption(c.gameObject,g);
+                break;
+            case "Nobara Kugisaki":
+                Vudu(c.gameObject, g);
+                break;
+            case "Kokichi Muta":
+                ChangeToAverage(c, g.GetComponent<DisplayCard>());
+                break;    
+            default :
+                break;                
+        }
+        cardSelectionPanel.SetActive(false);
+    }
+
+    private void ShowRowsToSelectd(DisplayCard activingC)
+    {
+        foreach(Transform t in cardListContainer)
+        {
+            Destroy(t.gameObject);
+        }
+        string[] rowsNames = {"Melee", "Ranged", "Seige", "OppMelee", "OppRanged", "OppSeige"};
+
+        for(int i = 0; i < rowsNames.Length; i++)
+        {
+            GameObject buttonRow = Instantiate(cardButtonPrefab, cardListContainer);
+            buttonRow.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => GiveValueToSelectedRow(rowsNames[i], activingC));
+        }
+        cardSelectionPanel.SetActive(true);
+    }
+
+    private void GiveValueToSelectedRow(string name, DisplayCard activingC)
+    {
+        switch(name)
+        {
+            case "Melee" :
+                selectedRow = board.transformMeleeRow;
+                break;
+            case "Ranged" :
+                selectedRow = board.transformRangedRow;
+                break;
+            case "Seige" :
+                selectedRow = board.transformSeigeRow;
+                break;
+            case "OppMelee" :
+                selectedRow = board.opponentTransformMeleeRow;
+                break;
+            case "OppRanged" :
+                selectedRow = board.opponentTransformRangedRow;
+                break;
+            case "OppSeige" :
+                selectedRow = board.opponentTransformSeigeRow;
+                break;
+            default :
+                selectedRow = null;
+                break;  
+        }
+        switch(activingC.card.name)
+        {
+            case "Shoko Ieiri" :
+                IncreaseAttackByTwo(selectedRow);
+                break;
+            case "Jogo":
+                ReduceByFive(activeCard, selectedRow);
+                break;
+            case "Autoencarnacion de la perfeccion" :
+                ChangeToLower(selectedRow);
+                break;
+            default :
+                break;    
+        }
+
+        cardSelectionPanel.SetActive(false);
+    }
+
+    private List<DisplayCard> GetCardsTo(DisplayCard activingC)
+    {
+        List<DisplayCard> cardsTo = new List<DisplayCard>();
+        Transform[] rows = new Transform[3];
+        if(activingC.card.owner == Card.Owner.Player) rows = GetRows(false);
+        else rows = GetRows(true);
+        if(rows.Length != 0)
+        {
+            foreach(Transform t in rows)
+            {
+                foreach(DisplayCard c in GetCards(t, true)) cardsTo.Add(c);
+            }
+        }
+        return cardsTo;
+    }
     
     private void DivideAttack(Transform Row, int count)
     {
@@ -553,12 +717,16 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     }
     private int CalculateAverage(DisplayCard[] cards)
     {
-        int average = 0;
-        foreach(DisplayCard c in cards)
+        if(cards.Length != 0)
         {
-            average += c.card.GetPower();
+            int average = 0;
+            foreach(DisplayCard c in cards)
+            {
+                average += c.card.GetPower();
+            }
+            return average/cards.Length;
         }
-        return average/cards.Length;
+        else return 0;
     }
 
     private int CalculateSum(Transform row)
@@ -575,44 +743,5 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 return sum;  
             }
         else return -1;
-    }
-
-    private void ApplyToRow(Transform row, Action<DisplayCard[]> effectAction)
-    {
-        DisplayCard[] cardsInRow = row.GetComponentsInChildren<DisplayCard>();
-        effectAction.Invoke(cardsInRow);
-    }
-
-    private void ApplyToAllRows(Action<DisplayCard[]> effectAction)
-    {
-        DisplayCard activingC = activeCard.GetComponent<DisplayCard>();
-
-        Transform[] allRows = activingC.card.owner == Card.Owner.Opponent 
-        ? new[]{board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow} 
-        : new[]{board.transformMeleeRow, board.transformRangedRow, board.transformSeigeRow};
-
-        foreach(var row in allRows)
-        {
-            ApplyToRow(row, effectAction);
-        }
-    }
-
-    private void ModifyRowByPower(Transform row, GameObject activingCard, Action<DisplayCard, int> effect, string errorSms)
-    {
-        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        int actPower = activingC.card.GetPower();
-
-        if(IsValidRow(row))
-        {
-            DisplayCard[] cards = row.GetComponentsInChildren<DisplayCard>();
-            foreach(DisplayCard c in cards)
-            {
-                effect.Invoke(c, actPower);
-            }
-        }
-        else 
-        {
-            ShowMessagePanel(errorSms);
-        }
-    }
+    } 
 }

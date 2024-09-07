@@ -387,7 +387,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
     
     private void Summon(GameObject cardToSummon, Transform row)
     {
-        //GameObject cardToSummon = Instantiate(cardPrefabs);
         cardToSummon.transform.SetParent(row);
         cardToSummon.transform.localPosition = Vector3.zero;
         cardToSummon.transform.localRotation = Quaternion.identity;
@@ -396,7 +395,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         DisplayCard c = cardToSummon.GetComponent<DisplayCard>();
         c.card.isActivated = true;
         cardToSummon.GetComponent<DisplayCard>().SetUp(c.card);
-        //Destroy(c.gameObject);
     }
     private int HowManyCardsByRow(Transform row)
     {
@@ -445,7 +443,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         {
             GameObject cardB = Instantiate(cardButtonPrefab, cardListContainer);
             cardB.GetComponent<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(c.card.name);
-            //cardB.GetComponent<UnityEngine.UI.Text>().text = " ";
             cardB.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => ReturnCardToHandPlayer(c));
         }
         cardSelectionPanel.SetActive(true);
@@ -460,8 +457,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
 
     private void ReturnCardToHand(GameObject cardToReturn, Transform hand)
     {
-        //GameObject cardToReturn = Instantiate(cardPrefabs);
-        //DisplayCard c = cardToReturn.GetComponent<DisplayCard>();
         if(hand.childCount >= 10 && hand == board.transformPlayerHand) cardToReturn.transform.SetParent(board.transformGraveyard);
         else if(hand.childCount >= 10 && hand == board.opponentTransformPlayerHand) cardToReturn.transform.SetParent(board.opponentTransformGraveyard);
         else cardToReturn.transform.SetParent(hand);
@@ -469,8 +464,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         cardToReturn.transform.localScale = Vector3.one;
         cardToReturn.transform.localPosition = Vector3.zero;
         cardToReturn.transform.localRotation = Quaternion.identity;
-        //cardToReturn.GetComponent<DisplayCard>().card = c.card;
-        //cardToReturn.GetComponent<DisplayCard>().SetUp(c.card);
         cardSelectionPanel.SetActive(false);
 
     }
@@ -502,7 +495,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         tokenCard.card.owner = c.card.owner;
 
         cardSelectionPanel.SetActive(false); 
-        //Destroy(c.gameObject);
     }
 
     private Transform RandomRowCard(DisplayCard c)
