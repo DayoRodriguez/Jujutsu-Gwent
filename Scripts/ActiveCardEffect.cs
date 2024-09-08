@@ -136,7 +136,7 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
         c.card.isActivated = true;
         c.SetUp(c.card);  
 
-        cardEffect.Excute(c.gameObject);
+        cardEffect.Execute(c.gameObject);
     }
 
 

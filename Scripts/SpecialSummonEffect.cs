@@ -16,13 +16,15 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
     
     private CardEffects cardEffect;
 
+    void Start()
+    {
+        board = FindObjectOfType<BoardManager>();
+        cardEffect = FindObjectOfType<CardEffects>();
+    }
+
     public void Execute(GameObject activingCard)
     {
-        Initialize();
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        //cardEffect = FindObjectOfType<CardEffects>();
-
-        //auxCard = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
@@ -69,7 +71,7 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
 
     public void Initialize()
     {
-        board = FindObjectOfType<BoardManager>();
+        
     }
 
     public void ShowMessagePanel(string sms)
@@ -143,9 +145,10 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
     //Jardin Sombrio de quimeras' effect
     public void ShadowGarden(GameObject activingCard)
     {   
-        int cardsInPlayerField = HowManyCardsByRow(board.transformMeleeRow) + HowManyCardsByRow(board.transformRangedRow) + HowManyCardsByRow(board.transformSeigeRow);
-        int cardsInOppField = HowManyCardsByRow(board.opponentTransformMeleeRow) + HowManyCardsByRow(board.opponentTransformRangedRow) + HowManyCardsByRow(board.opponentTransformSeigeRow);
-
+        int cardsInPlayerField = board.transformMeleeRow.childCount + board.transformRangedRow.childCount + board.transformSeigeRow.childCount;
+        int cardsInOppField = board.opponentTransformMeleeRow.childCount + board.opponentTransformRangedRow.childCount + board.opponentTransformSeigeRow.childCount;
+        Debug.Log("El campo rival tiene " + cardsInPlayerField);
+        Debug.Log("El campo rival tiene " + cardsInOppField);
         DisplayCard aux = activingCard.GetComponent<DisplayCard>();
 
         if(aux.card.owner == Card.Owner.Player)
@@ -221,7 +224,11 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
                 DisplayCard mahoragaCard = FindCardByName("Divine General Mahoraga", board.transformDeck);
                 if(mahoragaCard == null) mahoragaCard = FindCardByName("Divine General Mahoraga", board.transformPlayerHand);
 
-                if(mahoragaCard != null) Summon(mahoragaCard.gameObject, board.transformMeleeRow);
+                if(mahoragaCard != null)
+                {
+                    Summon(mahoragaCard.gameObject, board.transformMeleeRow);
+                    cardEffect.Execute(mahoragaCard.gameObject);
+                } 
                 else Debug.Log("Mahoraga no se encuentra ni en el deck ni en la mano");
             }
             else Debug.Log("No hay cartas en la fila Melee para sacrificar.");
@@ -236,7 +243,11 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
                 DisplayCard mahoragaCard = FindCardByName("Divine General Mahoraga", board.opponentTransformDeck);
                 if(mahoragaCard == null) mahoragaCard = FindCardByName("Divine General Mahoraga", board.opponentTransformPlayerHand);
 
-                if(mahoragaCard != null) Summon(mahoragaCard.gameObject, board.opponentTransformMeleeRow);
+                if(mahoragaCard != null)
+                {
+                    Summon(mahoragaCard.gameObject, board.opponentTransformMeleeRow);
+                    cardEffect.Execute(mahoragaCard.gameObject);
+                } 
                 else Debug.Log("Mahoraga no se encuentra ni en el deck ni en la mano");
             }
             else Debug.Log("No hay cartas en la fila Melee para sacrificar.");
@@ -335,7 +346,17 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
             }      
 
             if(cardsToSummon.Count != 0) ShowCardSelectionPanel(cardsToSummon);
-            else Debug.Log("No hay opciones disponibles para invocar la carta.");
+            else 
+            {
+                Debug.Log("No hay opciones disponibles para invocar la carta. Istanciamos un prefab");
+
+                GameObject copyCard = Instantiate(cardPrefabs, activingCard.transform.parent);
+                copyCard.transform.localPosition = Vector3.one;
+                copyCard.transform.localScale = Vector3.zero;
+                copyCard.transform.localRotation = Quaternion.identity;
+
+                copyCard.GetComponent<DisplayCard>().SetUp(activingC.card); 
+            }
         }
         //--------------------------------------------------------------
         else 
@@ -358,7 +379,17 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
             }      
 
             if(cardsToSummon.Count != 0) ShowCardSelectionPanel(cardsToSummon);
-            else Debug.Log("No hay opciones disponibles para invocar la carta.");
+            else
+            {
+                Debug.Log("No hay opciones disponibles para invocar la carta. Istanciamos un prefab");
+
+                GameObject copyCard = Instantiate(cardPrefabs, activingCard.transform.parent);
+                copyCard.transform.localPosition = Vector3.zero;
+                copyCard.transform.localScale = Vector3.one;
+                copyCard.transform.localRotation = Quaternion.identity;
+
+                copyCard.GetComponent<DisplayCard>().SetUp(activingC.card); 
+            }    
         }
     }
 
@@ -395,11 +426,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         DisplayCard c = cardToSummon.GetComponent<DisplayCard>();
         c.card.isActivated = true;
         cardToSummon.GetComponent<DisplayCard>().SetUp(c.card);
-    }
-    private int HowManyCardsByRow(Transform row)
-    {
-        DisplayCard[] cards = row.GetComponents<DisplayCard>();
-        return cards.Length;
     }
 
     public void ShowCardSelectionPanel(List<DisplayCard> cardsToShow)

@@ -23,6 +23,9 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 DrawAsManyAsI(activingCard);
                 break;
+            case "Divine General Mahoraga" :
+                Mahoraga(activingCard);
+                break;    
             default :
                 break;
         }
@@ -67,6 +70,10 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
             {
                 Draw(board.transformDeck, board.transformPlayerHand, howCard);
             }
+            else
+            {
+                Draw(board.transformDeck, board.transformPlayerHand, 1);
+            }
         }
         else 
         {
@@ -75,9 +82,14 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
             {
                 Draw(board.opponentTransformDeck, board.opponentTransformPlayerHand, howCard);
             }
+            else 
+            {
+                Draw(board.opponentTransformDeck, board.opponentTransformPlayerHand, 1);
+            }
         }
     }
 
+    //Mahoraga's effect
     public void Mahoraga(GameObject activingCard)
     {
         DisplayCard activatingCardLogic = activingCard.GetComponent<DisplayCard>();
@@ -102,12 +114,13 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
         int opponentMeleeRowCount = CountCardsInRow(opponentMeleeRow);
 
         // Calcular la diferencia entre las filas Melee
-        int difference = Mathf.Abs(playerMeleeRowCount - opponentMeleeRowCount);
-
+        int diference = Mathf.Abs(playerMeleeRowCount - opponentMeleeRowCount);
+        Debug.Log(diference);
         // Robar la cantidad correspondiente a la diferencia
-        if (difference > 0 && ThereIsCardInDeck(ownerDeck))
+        if (diference > 0 && ThereIsCardInDeck(ownerDeck))
         {
-            Draw(ownerDeck, ownerHand, difference);
+            Draw(ownerDeck, ownerHand, diference);
+            Debug.Log("Hemos robado " + diference);
         }
     }
 

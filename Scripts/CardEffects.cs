@@ -37,11 +37,45 @@ public class CardEffects : MonoBehaviour
         addCard = FindObjectOfType<AddCardEffect>();
     }
 
-    public void Excute(GameObject activingCard)
+    public void Execute(GameObject activingCard)
     {
         SetActivingCard(activingCard);
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
 
+        switch(activingC.card.cardEffects)
+        {
+            
+            case Card.CardEffect.ChangeAttack :
+                Debug.Log("Entramos en el switch");
+                changePower.Execute(activingCard);
+                break;
+            case Card.CardEffect.SpecialSummon :
+                Debug.Log("Entramos en el switch");
+                specialSummon.Execute(activingCard);
+                break;
+            case Card.CardEffect.Active :
+                Debug.Log("Entramos en el switch");
+                activeCard.Execute(activingCard);
+                break;
+            case Card.CardEffect.Destroy :
+                Debug.Log("Entramos en el switch");
+                destroyCard.Execute(activingCard);
+                break;
+            case Card.CardEffect.Draw :
+                Debug.Log("Entramos en el switch");
+                drawCard.Execute(activingCard);
+                break;
+            case Card.CardEffect.TakeControl :
+                Debug.Log("Entramos en el switch");
+                takeControl.Execute(activingCard);
+                break;
+            case Card.CardEffect.Add :
+                Debug.Log("Entramos en el switch");
+                addCard.Execute(activingCard);
+                break;
+            default : 
+                break;                          
+        }
         // if (NeedsRowSelection())
         // {
         //     board.SelectionRowIfNeeded(selectedRow =>
@@ -63,7 +97,7 @@ public class CardEffects : MonoBehaviour
         // {
         //     ExecuteEffectBasedOnCardEffect(activingC);
         // }
-        ExecuteEffectBasedOnCardEffect(activingC);
+        //ExecuteEffectBasedOnCardEffect(activingC);
 
     }
 
@@ -110,39 +144,6 @@ public class CardEffects : MonoBehaviour
 
     private void ExecuteEffectBasedOnCardEffect(DisplayCard activingC)
     {
-        switch(activingC.card.cardEffects)
-        {
-            
-            case Card.CardEffect.ChangeAttack :
-                Debug.Log("Entramos en el switch");
-                changePower.Execute(activingCard);
-                break;
-            case Card.CardEffect.SpecialSummon :
-                Debug.Log("Entramos en el switch");
-                specialSummon.Execute(activingCard);
-                break;
-            case Card.CardEffect.Active :
-                Debug.Log("Entramos en el switch");
-                activeCard.Execute(activingCard);
-                break;
-            case Card.CardEffect.Destroy :
-                Debug.Log("Entramos en el switch");
-                destroyCard.Execute(activingCard);
-                break;
-            case Card.CardEffect.Draw :
-                Debug.Log("Entramos en el switch");
-                drawCard.Execute(activingCard);
-                break;
-            case Card.CardEffect.TakeControl :
-                Debug.Log("Entramos en el switch");
-                takeControl.Execute(activingCard);
-                break;
-            case Card.CardEffect.Add :
-                Debug.Log("Entramos en el switch");
-                addCard.Execute(activingCard);
-                break;
-            default : 
-                break;                          
-        }
+        
     }
 }

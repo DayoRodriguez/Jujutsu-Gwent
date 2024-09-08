@@ -70,7 +70,7 @@
             }
             
             effectCard?.SetActivingCard(card);
-            effectCard.Excute(card);
+            effectCard.Execute(card);
                        
         }
 
