@@ -14,15 +14,14 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
     public BoardManager board;
     public CardEffects cardEffect;
 
+    void Start()
+    {
+        board = FindObjectOfType<BoardManager>();
+        cardEffect = FindObjectOfType<CardEffects>();
+    }
     public void Execute(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-
-        Initialize();
-
-        //cardEffect = FindObjectOfType<CardEffects>();
-
-        //card = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
@@ -38,23 +37,6 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
                 break;      
         }
     }
-
-    public void Initialize()
-    {
-        board = FindObjectOfType<BoardManager>();
-    }
-
-    public void ShowMessagePanel(string sms)
-    {
-        Debug.Log(sms);
-    }
-
-    public bool CanActive()
-    {
-        //Revisar la Implementaciob de este metodo
-        return true;
-    }
-
     public void EndEffect(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
@@ -92,12 +74,12 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
             }
             else
             {
-                ShowMessagePanel("No es posible activar la carta");
+                Debug.Log("No es posible activar la carta");
             }
         }
         else
         {
-            ShowMessagePanel("No es posible activar la carta");
+            Debug.Log("No es posible activar la carta");
         }
     }
 
@@ -140,7 +122,7 @@ public class ActiveCardEffect : MonoBehaviour , ICardEffect
     }
 
 
-    //Choso's effect
+    //Choso's and Panda's effect
     public void ActiveIncrease(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();

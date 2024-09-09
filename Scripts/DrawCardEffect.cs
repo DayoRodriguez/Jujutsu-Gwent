@@ -9,13 +9,15 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
     public PlayerDeck decks;
     private CardEffects cardEffect;
 
+    void Start()
+    {
+        cardEffect = FindObjectOfType<CardEffects>();
+        board = FindObjectOfType<BoardManager>();
+        decks = FindObjectOfType<PlayerDeck>();
+    }
     public void Execute(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        Initialize();
-        //cardEffect = FindObjectOfType<CardEffects>();
-
-        //card = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
@@ -33,7 +35,7 @@ public class DrawCardEffect : MonoBehaviour, ICardEffect
 
     public void Initialize()
     {
-        board = FindObjectOfType<BoardManager>();
+        
     }
 
     public void ShowMessagePanel(string sms)

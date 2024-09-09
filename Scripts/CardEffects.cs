@@ -76,74 +76,11 @@ public class CardEffects : MonoBehaviour
             default : 
                 break;                          
         }
-        // if (NeedsRowSelection())
-        // {
-        //     board.SelectionRowIfNeeded(selectedRow =>
-        //     {
-        //         this.selectedRow = selectedRow;
-        //         ExecuteEffectBasedOnCardEffect(activingC);
-        //     });
-        // }
-        // else if (NeedsCardSelection())
-        // {
-        //     board.SelectionCardIfNeeded(selectedCard =>
-        //     {
-            
-        //         this.effectSelectedCard = selectedCard;
-        //         ExecuteEffectBasedOnCardEffect(activingC);
-        //     });
-        // }
-        // else
-        // {
-        //     ExecuteEffectBasedOnCardEffect(activingC);
-        // }
-        //ExecuteEffectBasedOnCardEffect(activingC);
-
     }
 
     public void SetActivingCard(GameObject card)
     {
         activingCard = card;
         Debug.Log("La carta ha sido asignada correctamente");
-    }
-
-    public bool NeedsRowSelection()
-    {
-        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-
-        // Definir si el tipo de efecto requiere seleccionar una fila
-        switch (activingC.card.cardEffects)
-        {
-            case Card.CardEffect.ChangeAttack:
-            case Card.CardEffect.Destroy:
-            case Card.CardEffect.SpecialSummon:
-                return true;  // Estos efectos requieren seleccionar una fila
-            default:
-                return false; // Otros efectos no requieren selección de fila
-        }
-    }
-
-    // Nuevo método: verifica si el efecto necesita seleccionar una carta
-    public bool NeedsCardSelection()
-    {
-        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-
-        // Definir si el tipo de efecto requiere seleccionar una carta
-        switch (activingC.card.cardEffects)
-        {
-            case Card.CardEffect.TakeControl:
-            case Card.CardEffect.Destroy:
-            case Card.CardEffect.Add:
-            case Card.CardEffect.ChangeAttack:
-            case Card.CardEffect.SpecialSummon:
-                return true;  // Estos efectos requieren seleccionar una carta
-            default:
-                return false; // Otros efectos no requieren selección de carta
-        }
-    }
-
-    private void ExecuteEffectBasedOnCardEffect(DisplayCard activingC)
-    {
-        
     }
 }

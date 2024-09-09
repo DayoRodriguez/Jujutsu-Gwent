@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 27
   name: Panda
-  effect: Activate an increase card in the M attack grow
+  effect: ActiveIncrease
   faction: Magician
   spriteImage: {fileID: 21300000, guid: f561b7b012e3efa4c9594e35c3e99859, type: 3}
-  IsActivated: 0
+  isActivated: 1
   isLider: 0
   cardBack: {fileID: 21300000, guid: 9448800d33e6e51468be1e177c86bbb7, type: 3}
   isSpecial: 0

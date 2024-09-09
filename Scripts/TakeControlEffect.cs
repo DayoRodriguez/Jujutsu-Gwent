@@ -14,14 +14,15 @@ public class TakeControlEffect : MonoBehaviour , ICardEffect
     public BoardManager board;
     public Transform effectRow;
     private CardEffects cardEffect;
-    
+
+    void Start()
+    {
+        cardEffect = FindObjectOfType<CardEffects>();
+        board = FindObjectOfType<BoardManager>();
+    }
     public void Execute(GameObject activingCard)
     {
-        Initialize();
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        //cardEffect = FindObjectOfType<CardEffects>();
-
-        //card = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
@@ -34,26 +35,11 @@ public class TakeControlEffect : MonoBehaviour , ICardEffect
                     foreach(DisplayCard c in GetCards(t,true)) cardsToControl.Add(c);
                 }
                 if(cardsToControl.Count != 0) ShowCardToControl(cardsToControl);
+                EndEffect(activingCard);
                 break;
             default :
                 break;    
         }
-    }
-
-    public void Initialize()
-    {
-        board = FindObjectOfType<BoardManager>();
-    }
-
-    public void ShowMessagePanel(string sms)
-    {
-        Debug.Log(sms);
-    }
-
-    public bool CanActive()
-    {
-        //Revisar la Implementaciob de este metodo
-        return true;
     }
 
     public void EndEffect(GameObject activingCard)
@@ -76,13 +62,6 @@ public class TakeControlEffect : MonoBehaviour , ICardEffect
         selectedCard.transform.localRotation = Quaternion.identity;  
 
          cardSelectionPanel.SetActive(false);
-    }
-
-    private bool ThereIsCard(Transform Row)
-    {
-        DisplayCard[] cardsInRow = Row.GetComponentsInChildren<DisplayCard>();
-        if(cardsInRow.Length != 0) return true;
-        else return false;
     }
 
     private List<DisplayCard> GetCards(Transform orig, bool b)

@@ -38,7 +38,7 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 List<DisplayCard> cardsToAbs = GetCardsTo(activingC);
                 if(cardsToAbs.Count != 0) ShowCardsToChange(cardsToAbs, activingC);
-                Absorption(activingCard, selectedCard);
+                //Absorption(activingCard, selectedCard);
                 break;        
             case "ReducerCourt" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
@@ -68,7 +68,6 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 List<DisplayCard> cardsToMute = GetCardsTo(activingC);
                 if(cardsToMute.Count != 0) ShowCardsToChange(cardsToMute, activingC);
-                //SoulMutation(selectedCard, UnityEngine.Random.Range(0,21));
                 break;            
             case "BloodManipulation" :
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
@@ -89,28 +88,14 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 TempleEvil(activingCard);
                 break;    
+            case "DivideAllEnemysAttacks" :
+                DivideAllEnemysAttacks(activingCard);
+                break;     
             default :
                 selectedRow = null; 
                 selectedCard = null;
                 break;
         }
-    }
-
-    public void Initialize()
-    {
-       
-    }
-
-    public void ShowMessagePanel(string sms)
-    {
-        //Implementacion para mostrar el panel
-        Debug.Log(sms);
-    }
-
-    public bool CanActive()
-    {
-        //logica para evaluar si se puede activar el efecto 
-        return true; //Placeholder
     }
 
     public void EndEffect(GameObject activingCard)
@@ -193,34 +178,31 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         }
         else
         {
-            ShowMessagePanel("La carta seleccionada no es valida");
+           Debug.Log("La carta seleccionada no es valida");
         } 
     }
 
     //Nanami's Effect
     public void ReducerCourt(GameObject targedCard)
     {
-        int reduction = UnityEngine.Random.Range(1,8);
         DisplayCard targedC = targedCard.GetComponent<DisplayCard>();
-        targedC.card.SetAttack(targedC.card.GetPower() - reduction);
-        Debug.Log(targedC.card.GetPower());
-        if(targedC.card.GetPower() <= 5)
+        int reduction = UnityEngine.Random.Range(1,8);
+        int newAttack = targedC.card.GetPower() - reduction;
+        targedC.card.SetAttack(newAttack);
+
+        if(newAttack <= 5)
         {
             if(targedC.card.owner == Card.Owner.Player)
             {
                 targedCard.transform.SetParent(board.transformGraveyard);
-                targedCard.transform.localPosition = Vector3.zero;
-                targedCard.transform.localRotation = Quaternion.identity;
-                targedCard.transform.localScale = Vector3.one;
             }
             else
             {
                 targedCard.transform.SetParent(board.opponentTransformGraveyard);
-                targedCard.transform.localPosition = Vector3.zero;
-                targedCard.transform.localRotation = Quaternion.identity;
-                targedCard.transform.localScale = Vector3.one;
-
             }
+            targedCard.transform.localPosition = Vector3.zero;
+            targedCard.transform.localRotation = Quaternion.identity;
+            targedCard.transform.localScale = Vector3.one;
         }
     }
 
@@ -260,13 +242,16 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     }
 
     //Mahito's Effect
-    public void SoulMutation(GameObject targedCard, int attackChange)
+    public void SoulMutation(GameObject targedCard)
     {
         DisplayCard targedC = targedCard.GetComponent<DisplayCard>();
-        if(targedC != null && 0 <= attackChange && attackChange <= 20)
+
+        int newAttack = UnityEngine.Random.Range(0, 21);
+        if(targedC != null)
         {
-            targedC.card.SetAttack(attackChange);
-            Debug.Log(targedC.card.GetPower());
+            targedC.card.SetAttack(newAttack);
+            Debug.Log("Nuevo ataque asignado: " + newAttack);
+            Debug.Log("Ataque actual de la carta: " + targedC.card.GetPower());
         }
     }
 
@@ -582,7 +567,6 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
             buttonCard.GetComponent<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(c.card.name);
             buttonCard.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() =>
             {
-                //selectedCard = c.gameObject;
                 ActiveEffect(activingC, c.gameObject);
                 cardSelectionPanel.SetActive(false);        
             });
@@ -598,7 +582,7 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 ReducerCourt(g);
                 break;
             case "Mahito":
-                SoulMutation(g, UnityEngine.Random.Range(0, 21));
+                SoulMutation(g);
                 break;
             case "Hanami":
                 Absorption(c.gameObject,g);

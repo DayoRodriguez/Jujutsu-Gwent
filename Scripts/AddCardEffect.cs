@@ -14,9 +14,13 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
     public BoardManager board;
     private CardEffects cardEffect;
 
+    void Start()
+    {
+        board = FindObjectOfType<BoardManager>();
+        cardEffect = FindObjectOfType<CardEffects>();
+    }
     public void Execute(GameObject activingCard)
     {   
-        Initialize();
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
 
         switch(activingC.card.effect)
@@ -39,23 +43,6 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
                 break;    
         }
     }
-
-    public void Initialize()
-    {
-        board = FindObjectOfType<BoardManager>();
-    }
-
-    public void ShowMessagePanel(string sms)
-    {
-        Debug.Log(sms);
-    }
-
-    public bool CanActive()
-    {
-        //Revisar la Implementaciob de este metodo
-        return true;
-    }
-
     public void EndEffect(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();

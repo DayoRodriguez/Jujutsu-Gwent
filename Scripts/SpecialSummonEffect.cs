@@ -69,22 +69,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         }
     }
 
-    public void Initialize()
-    {
-        
-    }
-
-    public void ShowMessagePanel(string sms)
-    {
-        Debug.Log(sms);
-    }
-
-    public bool CanActive()
-    {
-        //Revisar este metodo antes de hacerlo
-        return true;
-    }
-
     public void EndEffect(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
@@ -543,45 +527,6 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         }
         else return null;
     }
-
-    // private void ShowInvocationOptions(List<string> options, DisplayCard activingC)
-    // {
-    //     foreach(Transform child in cardListContainer)
-    //     {
-    //         Destroy(child.gameObject);
-    //     }
-
-    //     foreach (string option in options)
-    //     {
-    //         GameObject buttonObj = Instantiate(cardButtonPrefab, cardListContainer);
-    //         Button button = buttonObj.GetComponent<Button>();
-    //         Text buttonText = buttonObj.GetComponentInChildren<Text>();
-    //         buttonText.text = option;
-
-    //         // Añadir evento de clic al botón para manejar la invocación según la opción seleccionada
-    //         button.onClick.AddListener(() =>
-    //         {
-    //             switch (option)
-    //             {
-    //                 case "Deck":
-    //                     if(activingC.card.owner == Card.Owner.Player) Summon(activingC.gameObject, board.transformDeck);
-    //                     else Summon(activingC.gameObject, board.opponentTransformDeck);
-    //                     break;
-    //                 case "Hand":
-    //                     if(activingC.card.owner == Card.Owner.Player) Summon(activingC.gameObject, board.transformPlayerHand);
-    //                     else Summon(activingC.gameObject, board.opponentTransformPlayerHand);
-    //                     break;
-    //                 case "Graveyard":
-    //                     if(activingC.card.owner == Card.Owner.Player) Summon(activingC.gameObject, board.transformGraveyard);
-    //                     else Summon(activingC.gameObject, board.opponentTransformGraveyard);
-    //                     break;
-    //             }
-    //             cardSelectionPanel.SetActive(false);
-    //         });
-
-    //         cardSelectionPanel.SetActive(true);
-    //     }
-    // }
 
     private DisplayCard MaxAttackCard(Transform Row)
     {

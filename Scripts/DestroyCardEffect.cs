@@ -12,15 +12,15 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
 
     public GameObject auxCard;
     public BoardManager board;
-    private CardEffects cardEffect;
+
+    void Start()
+    {
+        board = FindObjectOfType<BoardManager>();
+    }
 
     public void Execute(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
-        Initialize();
-        //cardEffect = FindObjectOfType<CardEffects>();
-
-        //auxCard = cardEffect.activingCard;
 
         switch(activingC.card.effect)
         {
@@ -48,26 +48,13 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 GreatVoid(activingCard);
                 EndEffect(activingCard);
-                break;        
+                break;    
+            case "Violet" :
+                Violet(activingCard);
+                break;    
             default :
                 break;    
         }
-    }
-
-    public void Initialize()
-    {
-        board = FindObjectOfType<BoardManager>();
-    }
-
-    public void ShowMessagePanel(string sms)
-    {
-        Debug.Log(sms);
-    }
-
-    public bool CanActive()
-    {
-        //Revisar la Implementaciob de este metodo
-        return true;
     }
 
     public void EndEffect(GameObject activingCard)
@@ -84,34 +71,22 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
     //Despliegue de Dominio's effect
     public void DespliegueDominio(GameObject activingCard)
     {
-        DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
 
-        //if(activingC.card.owner == Card.Owner.Player)
-        //{
-            if(board.transformWeatherMeleeSlot.childCount != 0 || board.transformWeatherRangedSlot.childCount != 0 || board.transformWeatherSeigeSlot.childCount != 0
-            || board.opponentTransformWeatherMeleeSlot.childCount != 0 || board.opponentTransformWeatherRangedSlot.childCount != 0 || board.opponentTransformWeatherSeigeSlot.childCount != 0)
+        if(board.transformWeatherMeleeSlot.childCount != 0 || board.transformWeatherRangedSlot.childCount != 0 || board.transformWeatherSeigeSlot.childCount != 0
+        || board.opponentTransformWeatherMeleeSlot.childCount != 0 || board.opponentTransformWeatherRangedSlot.childCount != 0 || board.opponentTransformWeatherSeigeSlot.childCount != 0)
+        {
+            List<DisplayCard> climateCard = new List<DisplayCard>();
+            Transform[] weatherRows = {board.transformWeatherMeleeSlot, board.transformWeatherRangedSlot, board.transformWeatherSeigeSlot,
+                                      board.opponentTransformWeatherMeleeSlot, board.opponentTransformWeatherRangedSlot, board.opponentTransformWeatherSeigeSlot};
+            foreach(Transform t in weatherRows)
             {
-                List<DisplayCard> climateCard = new List<DisplayCard>();
-                Transform[] weatherRows = {board.transformWeatherMeleeSlot, board.transformWeatherRangedSlot, board.transformWeatherSeigeSlot,
-                                            board.opponentTransformWeatherMeleeSlot, board.opponentTransformWeatherRangedSlot, board.opponentTransformWeatherSeigeSlot};
-                foreach(Transform t in weatherRows)
+                foreach(DisplayCard c in GetCards(t,true))
                 {
-                    if(t.GetComponentsInChildren<DisplayCard>().Length != 0)
-                    {
-                        AddCardToList(t, climateCard);
-                    }
+                    climateCard.Add(c);
                 }
-                if(climateCard.Count != 0) ShowCardToDestroy(climateCard);                    
             }
-        //}
-        // else
-        // {
-        //     if(ThereIs(board.opponentTransformWeatherMeleeSlot) || ThereIs(board.opponentTransformWeatherRangedSlot) || ThereIs(board.opponentTransformWeatherSeigeSlot))
-        //     {
-        //         SelectedCard();
-        //         DestroyCard();
-        //     }
-        // }
+            if(climateCard.Count != 0) ShowCardToDestroy(climateCard);                    
+        }
 
         EndEffect(activingCard);
     }
@@ -185,11 +160,16 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
 
         if(activingC.card.owner == Card.Owner.Player)
         {
-            AddCardToList(board.transformMeleeRow, cardsInOppField);
-            AddCardToList(board.transformRangedRow, cardsInOppField);
-            AddCardToList(board.transformSeigeRow, cardsInOppField);
+            Transform[] rivalField = GetRows(false);
+            foreach(Transform t in rivalField)
+            {
+                foreach(DisplayCard c in GetCards(t,true))
+                {
+                    cardsInOppField.Add(c);
+                }
+            }
 
-            cardsInOppField.Sort((card1, card2) => (card2.card.GetPower().CompareTo(card1.card.GetPower())));
+            cardsInOppField.Sort((card1, card2) => card2.card.GetPower().CompareTo(card1.card.GetPower()));
 
             for(int i = 0; i < Math.Min(3, cardsInOppField.Count); i++)
             {
@@ -198,11 +178,15 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
         }
         else
         {
-            AddCardToList(board.opponentTransformMeleeRow, cardsInOppField);
-            AddCardToList(board.opponentTransformRangedRow, cardsInOppField);
-            AddCardToList(board.opponentTransformSeigeRow, cardsInOppField);
-
-            cardsInOppField.Sort((card1, card2) => (card2.card.GetPower().CompareTo(card1.card.GetPower())));
+            Transform[] rivalField = GetRows(false);
+            foreach(Transform t in rivalField)
+            {
+                foreach(DisplayCard c in GetCards(t,true))
+                {
+                    cardsInOppField.Add(c);
+                }
+            }
+            cardsInOppField.Sort((card1, card2) => card2.card.GetPower().CompareTo(card1.card.GetPower()));
 
             for(int i = 0; i < Math.Min(3, cardsInOppField.Count); i++)
             {
@@ -247,14 +231,6 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
     }
 
     //--------Metodos Basicos para utilizar en los efectos------------------------------------------------------------
-    // private bool ThereIs(Transform Row)
-    // {
-    //     DisplayCard[] cards = Row.GetComponentsInChildren<DisplayCard>();
-        
-    //     if(cards.Length != 0) return true;
-    //     else return false;
-    // }
-
     private DisplayCard MaxAttackCard(Transform Row)
     {
         if(Row == board.transformMeleeRow || Row == board.transformRangedRow || Row == board.transformSeigeRow
@@ -419,5 +395,24 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
         }
         
         cardSelectionPanel.SetActive(true);
+    }
+
+    private List<DisplayCard> GetCards(Transform origin, bool b)
+    {
+        List<DisplayCard> cardsToShow = new List<DisplayCard>();
+        DisplayCard[] cards = origin.GetComponentsInChildren<DisplayCard>();
+
+        foreach(DisplayCard c in cards)
+        {
+            if(b && c.card.isUnit) cardsToShow.Add(c);
+            else if(!c.card.isUnit) cardsToShow.Add(c);
+        }
+        return cardsToShow;
+    }
+
+    private Transform[] GetRows(bool b)
+    {
+        if(b) return new Transform[] {board.transformMeleeRow, board.transformRangedRow, board.transformSeigeRow};
+        else return new Transform[] {board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow};
     }
 }

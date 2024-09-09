@@ -43,8 +43,8 @@
 
         public CardEffects effectCard; 
 
-        private bool playerHasPerformedAction = false;
-        private bool opponentHasPerformedAction = false;
+        public bool playerHasPerformedAction = false;
+        public bool opponentHasPerformedAction = false;
 
         void Start()
         {
@@ -207,6 +207,7 @@
         row == opponentTransformWeatherMeleeSlot || row == opponentTransformWeatherRangedSlot || row == opponentTransformWeatherSeigeSlot;
         
         private bool IsSpecialSlot(Transform row) => row ==transformSpecialCardSlot || row == opponentTransformSpecialCardSlot;
+
         public void SelectionRowIfNeeded(Action<Transform> effectAction)
         {
             StartCoroutine(WaitForSelection<Transform>(effectSelectedRow => effectAction(effectSelectedRow), () => effectSelectedRow == null));

@@ -64,9 +64,9 @@ public class GameManager : MonoBehaviour
   IEnumerator FirstDraw()
   {
     PlayerDeck playerDeck = FindObjectOfType<PlayerDeck>();
-    playerDeck.FirstDraw(playerDeck.PlayerHand, playerDeck.playerDeck);
-    playerDeck.FirstDraw(playerDeck.OpponentPlayerHand, playerDeck.OpponentPlayerDeck);
-    StartCoroutine(playerDeck.FirtsDrawPhases());
+    playerDeck.FirstDraw(playerDeck.playerHand, playerDeck.playerDeck);
+    playerDeck.FirstDraw(playerDeck.opponentPlayerHand, playerDeck.opponentPlayerDeck);
+    yield return StartCoroutine(playerDeck.FirtsDrawPhases());
     yield return new WaitUntil(() => !playerDeck.StartedSMS.activeSelf);
     if(playerHasWonRPS) actualState = GameState.PlayerTurn;
     else actualState = GameState.OpponentTurn;
@@ -177,7 +177,7 @@ public class GameManager : MonoBehaviour
         playerRoundWin++;
         RoundResoultText.text = "Player has Won";
     }
-    if(playerPower < opponentPower)
+    else if(playerPower < opponentPower)
     {
         opponentRoundWin++;
         RoundResoultText.text = "Opponent has Won";

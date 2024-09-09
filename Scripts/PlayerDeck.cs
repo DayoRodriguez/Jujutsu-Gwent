@@ -15,13 +15,13 @@ public class PlayerDeck : MonoBehaviour
     public GameObject StartedSMS;
 
     public Transform playerDeck;
-    public Transform OpponentPlayerDeck;
+    public Transform opponentPlayerDeck;
 
-    public Transform PlayerHand;
-    public Transform OpponentPlayerHand;
+    public Transform playerHand;
+    public Transform opponentPlayerHand;
 
-    public Transform LeaderCard;
-    public Transform OpponentLeaderCard;
+    public Transform leaderCard;
+    public Transform opponentLeaderCard;
 
     private BoardManager board;
 
@@ -30,11 +30,11 @@ public class PlayerDeck : MonoBehaviour
     {
         board = FindObjectOfType<BoardManager>();
 
-        DeckCreator(FactionSelection.Instance.playerFactionDeck, deck, ref playerLeaderInstantiated, LeaderCard);
+        DeckCreator(FactionSelection.Instance.playerFactionDeck, deck, ref playerLeaderInstantiated, leaderCard);
         InstantiateDeck(deck, playerDeck); 
 
-        DeckCreator(FactionSelection.Instance.opponentFactionDeck, opponentDeck, ref opponentLeaderInstantiated, OpponentLeaderCard);  
-        InstantiateDeck(opponentDeck, OpponentPlayerDeck);
+        DeckCreator(FactionSelection.Instance.opponentFactionDeck, opponentDeck, ref opponentLeaderInstantiated, opponentLeaderCard);  
+        InstantiateDeck(opponentDeck, opponentPlayerDeck);
 
         // FirstDraw(PlayerHand,playerDeck);
         // FirstDraw(OpponentPlayerHand,OpponentPlayerDeck);
@@ -162,13 +162,13 @@ public class PlayerDeck : MonoBehaviour
                 selectedCard.gameObject.AddComponent<CardLogic>();
             }
             
-            if(hand == PlayerHand)
+            if(hand == playerHand)
             {
                 selectedCard.card.owner = Card.Owner.Player;
                 Debug.Log("La carta es" + selectedCard.card.name);
                 Debug.Log("La carta esta en la mano del " + selectedCard.card.owner.ToString());
             }
-            else if(hand == OpponentPlayerHand)
+            else if(hand == opponentPlayerHand)
             {
                 selectedCard.card.owner = Card.Owner.Opponent;
                 Debug.Log("La carta es" + selectedCard.card.name);
@@ -189,10 +189,10 @@ public class PlayerDeck : MonoBehaviour
     private IEnumerator StartMulliganPhase()
     {
         //Fase Mulligan de Player
-        yield return StartCoroutine(MulliganPhase(PlayerHand, playerDeck));
+        yield return StartCoroutine(MulliganPhase(playerHand, playerDeck));
 
         //Fase Mulligan de Opponent
-        yield return StartCoroutine(MulliganPhase(OpponentPlayerHand, OpponentPlayerDeck));
+        yield return StartCoroutine(MulliganPhase(opponentPlayerHand, opponentPlayerDeck));
 
         Debug.Log("La fase de Mulligan ha sido completada");
     }
@@ -272,8 +272,8 @@ public class PlayerDeck : MonoBehaviour
         cardD.transform.localRotation = Quaternion.identity;
         cardD.transform.localScale = Vector3.one;
         
-        if(hand == PlayerHand) cardD.card.owner = Card.Owner.Player;
-        if(hand == OpponentPlayerHand) cardD.card.owner = Card.Owner.Opponent;
+        if(hand == playerHand) cardD.card.owner = Card.Owner.Player;
+        if(hand == opponentPlayerHand) cardD.card.owner = Card.Owner.Opponent;
 
     }
 
