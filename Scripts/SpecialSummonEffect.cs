@@ -151,15 +151,12 @@ public class SpecialSummonEffect : MonoBehaviour , ICardEffect
         {
             if(cardsInPlayerField > cardsInOppField)
             {
-                if(cardsInOppField > cardsInPlayerField)
+                Transform[] rows = {board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow};
+                for(int i = 0; i < cardsInPlayerField - cardsInOppField; i++)
                 {
-                    Transform[] rows = {board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow};
-                    for(int i = 0; i < cardsInOppField - cardsInPlayerField; i++)
-                    {
-                        int random = UnityEngine.Random.Range(0, rows.Length);
-                        SummonToken(activingCard, rows[random]);
-                    }   
-                }
+                    int random = UnityEngine.Random.Range(0, rows.Length);
+                    SummonToken(activingCard, rows[random]);
+                }                   
             }
         }
     }

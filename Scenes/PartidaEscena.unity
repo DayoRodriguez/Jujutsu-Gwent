@@ -2193,6 +2193,7 @@ MonoBehaviour:
   cardButtonPrefab: {fileID: 2696545424932650561, guid: 94c72c9fc7f78ef4fb0ac993b4ab609a, type: 3}
   cardListContainer: {fileID: 2002362627}
   cardPrefabs: {fileID: 6522575827237403951, guid: 75d20380559600e4c801d459d5cef116, type: 3}
+  selectedRow: {fileID: 0}
 --- !u!114 &623687943
 MonoBehaviour:
   m_ObjectHideFlags: 0

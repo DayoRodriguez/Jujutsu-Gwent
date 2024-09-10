@@ -35,9 +35,10 @@ public abstract class Card : ScriptableObject
 
     public void SetAttack(int n)
     {
-        if(isUnit)
+        if(isUnit && this is UnitCard)
         {
-            UnitCard.Power = n;
+            UnitCard unitCard = (UnitCard)this;
+            unitCard.power = n;
         }
     }
 }

@@ -11,14 +11,15 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
 
     private GameObject activeCard;
     private BoardManager board;
-    private Transform selectedRow;
-    private GameObject selectedCard;
+    public Transform selectedRow;
+    //private GameObject selectedCard;
 
-    private CardEffects cardEffect;
+    //private CardEffects cardEffect;
 
     void Start()
     {
         board = FindObjectOfType<BoardManager>();
+       
     } 
     public void Execute(GameObject activingCard)
     {
@@ -27,27 +28,20 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         switch(activingC.card.effect)
         {
             case "ReduceByFive" :
-                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ShowRowsToSelectd(activingC);
                 break;
             case "ChangeToLower" :
-                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ShowRowsToSelectd(activingC);
                 break;
             case "Absorption" :
-                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 List<DisplayCard> cardsToAbs = GetCardsTo(activingC);
                 if(cardsToAbs.Count != 0) ShowCardsToChange(cardsToAbs, activingC);
-                //Absorption(activingCard, selectedCard);
                 break;        
             case "ReducerCourt" :
-                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 List<DisplayCard> cardsToCurt = GetCardsTo(activingC);
                 if(cardsToCurt.Count != 0) ShowCardsToChange(cardsToCurt, activingC);
-                //ReducerCourt(selectedCard);
                 break;
             case "ChangeToAverage" :
-                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 List<DisplayCard> cardsToAverage = new List<DisplayCard>();
                 Transform[] field = {board.transformMeleeRow, board.transformRangedRow, board.transformSeigeRow
                                     ,board.opponentTransformMeleeRow, board.opponentTransformRangedRow, board.opponentTransformSeigeRow};
@@ -65,27 +59,23 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 if(cardsToAverage.Count != 0) ShowCardsToChange(cardsToAverage, activingC);
                 break;
             case "SoulMutation" :
-                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 List<DisplayCard> cardsToMute = GetCardsTo(activingC);
                 if(cardsToMute.Count != 0) ShowCardsToChange(cardsToMute, activingC);
                 break;            
             case "BloodManipulation" :
-                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 BloodManipulation(activingCard);
+                EndEffect(activingCard);
                 break;
-            case "Vudu" :
+            case "Vudu" : //Comprobar
                 Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 List<DisplayCard> cardsToVudu = GetCardsTo(activingC);
                 if(cardsToVudu.Count != 0) ShowCardsToChange(cardsToVudu, activingC);
-                //Vudu(activingCard, selectedCard);
                 break;
             case "IncreaseAttackByTwo" :
-                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 ShowRowsToSelectd(activingC);
                 IncreaseAttackByTwo(selectedRow);
                 break;            
             case "TempleEvil" :
-                Debug.Log("Activando el efecto de la carta " + activingC.card.name);
                 TempleEvil(activingCard);
                 break;    
             case "DivideAllEnemysAttacks" :
@@ -93,7 +83,6 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 break;     
             default :
                 selectedRow = null; 
-                selectedCard = null;
                 break;
         }
     }
@@ -107,13 +96,6 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
             Transform grav = activingC.card.owner == Card.Owner.Player ? board.transformGraveyard : board.opponentTransformGraveyard;
             board.CleanRow(activingCard.transform.parent, grav);
         }
-    }
-
-    public bool IsValidRow(Transform row)
-    {
-        return activeCard.GetComponent<DisplayCard>().card.owner == Card.Owner.Opponent
-        ? row != board.transformMeleeRow && row != board.transformRangedRow && row != board.transformSeigeRow
-        : row != board.opponentTransformMeleeRow && row != board.opponentTransformRangedRow && row != board.opponentTransformSeigeRow;
     }
 
     //Jogo's effect
@@ -140,8 +122,6 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
                 }
             }
         }
-        
-        //ModifyRowByPower(row, activingCard, (c, actPower) => c.card.SetAttack(c.card.GetPower() - 5), "La seleccion no es valida vuelva a intentarlo");
     }
 
     //AutoEncarnacion de la Perfeccion's effect
@@ -172,9 +152,7 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         {
             int absorpbedAttack = targedC.card.GetPower();
             targedC.card.SetAttack(0);
-            Debug.Log("La carta seleccionada tiene" + targedC.card.GetPower());
             activingC.card.SetAttack(activingC.card.GetPower() + absorpbedAttack);
-            Debug.Log(activingC.card.GetPower());
         }
         else
         {
@@ -246,12 +224,10 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     {
         DisplayCard targedC = targedCard.GetComponent<DisplayCard>();
 
-        int newAttack = UnityEngine.Random.Range(0, 21);
+        int newAttack = UnityEngine.Random.Range(0, targedC.card.GetPower());
         if(targedC != null)
         {
             targedC.card.SetAttack(newAttack);
-            Debug.Log("Nuevo ataque asignado: " + newAttack);
-            Debug.Log("Ataque actual de la carta: " + targedC.card.GetPower());
         }
     }
 
@@ -330,22 +306,14 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     //Nobara's effect
     public void Vudu(GameObject activingCard, GameObject targedCard)
     {
-        if((activingCard.transform.parent == board.transformRangedRow && targedCard.transform.parent == board.opponentTransformRangedRow)
-            || (activingCard.transform.parent == board.transformSeigeRow && targedCard.transform.parent == board.opponentTransformSeigeRow))
-            {
-                int howManyActivingCard = HowManyThereAre(board.transformRangedRow, activingCard) + HowManyThereAre(board.transformSeigeRow, activingCard);
-                int howManyTargedCard = HowManyThereAre(board.opponentTransformRangedRow, targedCard) + HowManyThereAre(board.opponentTransformSeigeRow, targedCard);
-                DisplayCard targedC = targedCard.GetComponent<DisplayCard>();
-                targedC.card.SetAttack(targedC.card.GetPower()/(howManyActivingCard + howManyTargedCard));
-            }
-        else if((activingCard.transform.parent == board.opponentTransformRangedRow && targedCard.transform.parent == board.transformRangedRow)
-            || (activingCard.transform.parent == board.opponentTransformSeigeRow && targedCard.transform.parent == board.transformSeigeRow))
-            {
-                int howManyActivingCard = HowManyThereAre(board.opponentTransformRangedRow, activingCard) + HowManyThereAre(board.opponentTransformSeigeRow, activingCard);
-                int howManyTargedCard = HowManyThereAre(board.transformRangedRow, targedCard) + HowManyThereAre(board.transformSeigeRow, targedCard);
-                DisplayCard targedC = targedCard.GetComponent<DisplayCard>();
-                targedC.card.SetAttack(targedC.card.GetPower()/(howManyActivingCard + howManyTargedCard));
-            }    
+        int howManyActivingCard = HowManyThereAre(board.transformMeleeRow, activingCard) + HowManyThereAre(board.transformRangedRow, activingCard) + HowManyThereAre(board.transformSeigeRow, activingCard)
+                                + HowManyThereAre(board.opponentTransformMeleeRow, activingCard) + HowManyThereAre(board.opponentTransformRangedRow, activingCard) + HowManyThereAre(board.opponentTransformSeigeRow, activingCard);
+
+        int howManyTargedCard = HowManyThereAre(board.opponentTransformMeleeRow, targedCard) + HowManyThereAre(board.opponentTransformRangedRow, targedCard) + HowManyThereAre(board.opponentTransformSeigeRow, targedCard)
+                            + HowManyThereAre(board.transformMeleeRow, targedCard) + HowManyThereAre(board.transformRangedRow, targedCard) + HowManyThereAre(board.transformSeigeRow, targedCard);
+
+        DisplayCard targedC = targedCard.GetComponent<DisplayCard>();
+        targedC.card.SetAttack(targedC.card.GetPower()/(howManyActivingCard + howManyTargedCard)); 
     }
 
     //Ryomen Sukuna's effect
@@ -368,16 +336,18 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
     }
 
     //Shoko Ieiri's effect
-    public void IncreaseAttackByTwo(Transform Row)
+    public void IncreaseAttackByTwo(Transform row)
     {
-        DisplayCard[] cards = Row.GetComponentsInChildren<DisplayCard>();
+        DisplayCard[] cards = row.GetComponentsInChildren<DisplayCard>();
         if(cards.Length != 0)
         {
             foreach(DisplayCard c in cards)
             {
-                c.card.SetAttack(c.card.GetPower() + 2);
+                int attackToIncrease = c.card.GetPower();
+                c.card.SetAttack(attackToIncrease + 2);
             }
         }
+        SeeAttack(row);
     }
 
     //Temple of Evil's effect
@@ -387,11 +357,11 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         DisplayCard activingC = ActivingCard.GetComponent<DisplayCard>();
         if(activingC.card.owner == Card.Owner.Player)
         {
-            liderCard = board.transformLeaderCardSlot.GetChild(0).GetComponent<DisplayCard>();
+            liderCard = board.transformLeaderCardSlot.GetComponentInChildren<DisplayCard>();
         }  
         else
         {
-            liderCard = board.opponentTransformLeaderCardSlot.GetChild(0).GetComponent<DisplayCard>();
+            liderCard = board.opponentTransformLeaderCardSlot.GetComponentInChildren<DisplayCard>();
         }
 
         if(liderCard.card.name != "Ryomen Sukuna")
@@ -415,51 +385,60 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
 
             if(meleeSum == maxRowPlayer)
             {
-                greatSumRow = board.transformMeleeRow.GetComponents<DisplayCard>();
+                greatSumRow = board.transformMeleeRow.GetComponentsInChildren<DisplayCard>();
                 greatRow = board.transformMeleeRow;
             }  
             else if(rangedSum == maxRowPlayer)
             {
-                greatSumRow = board.transformRangedRow.GetComponents<DisplayCard>();
+                greatSumRow = board.transformRangedRow.GetComponentsInChildren<DisplayCard>();
                 greatRow = board.transformRangedRow;
             }
             else
             {
-                greatSumRow = board.transformSeigeRow.GetComponents<DisplayCard>();
+                greatSumRow = board.transformSeigeRow.GetComponentsInChildren<DisplayCard>();
                 greatRow = board.transformSeigeRow;
             }
             //-------------
             if(oppMeleeSum == maxRowOpp)
             {
-                greatOppSumRow = board.opponentTransformMeleeRow.GetComponents<DisplayCard>();
+                greatOppSumRow = board.opponentTransformMeleeRow.GetComponentsInChildren<DisplayCard>();
                 greatOppRow = board.opponentTransformMeleeRow;
             }  
             else if(oppRangedSum == maxRowOpp)
             {
-                greatOppSumRow = board.opponentTransformRangedRow.GetComponents<DisplayCard>();
+                greatOppSumRow = board.opponentTransformRangedRow.GetComponentsInChildren<DisplayCard>();
                 greatOppRow = board.opponentTransformRangedRow;
             }
             else
             {
-                greatOppSumRow = board.opponentTransformSeigeRow.GetComponents<DisplayCard>();
+                greatOppSumRow = board.opponentTransformSeigeRow.GetComponentsInChildren<DisplayCard>();
                 greatOppRow = board.opponentTransformSeigeRow;
             }
             //-------
             if(greatSumRow.Length != greatOppSumRow.Length)
             {
-                DivideAttack(greatRow,Math.Abs(greatSumRow.Length - greatOppSumRow.Length));
-                DivideAttack(greatOppRow,Math.Abs(greatSumRow.Length - greatOppSumRow.Length));
+                DivideAttack(greatRow,Math.Max(greatSumRow.Length, greatOppSumRow.Length));
+                DivideAttack(greatOppRow,Math.Max(greatSumRow.Length, greatOppSumRow.Length));
             }
             else
             {
-                DivideAttack(greatRow, 1);
-                DivideAttack(greatOppRow, 1);
+                if(greatSumRow.Length != 0)
+                {
+                    DivideAttack(greatRow, greatSumRow.Length);
+                    DivideAttack(greatOppRow, greatSumRow.Length);
+                } 
+                else 
+                {
+                    DivideAttack(greatRow, 1);
+                    DivideAttack(greatOppRow, 1);
+                }    
             }
         }
         else
         {
             
             int meleeSum = CalculateSum(board.transformMeleeRow);
+            Debug.Log(meleeSum);
             int rangedSum = CalculateSum(board.transformRangedRow);
             int seigeSum = CalculateSum(board.transformSeigeRow);
 
@@ -478,33 +457,33 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
 
             if(meleeSum == maxRowPlayer)
             {
-                greatSumRow = board.transformMeleeRow.GetComponents<DisplayCard>();
+                greatSumRow = board.transformMeleeRow.GetComponentsInChildren<DisplayCard>();
                 greatRow = board.transformMeleeRow;
             }  
             else if(rangedSum == maxRowPlayer)
             {
-                greatSumRow = board.transformRangedRow.GetComponents<DisplayCard>();
+                greatSumRow = board.transformRangedRow.GetComponentsInChildren<DisplayCard>();
                 greatRow = board.transformRangedRow;
             }
             else
             {
-                greatSumRow = board.transformSeigeRow.GetComponents<DisplayCard>();
+                greatSumRow = board.transformSeigeRow.GetComponentsInChildren<DisplayCard>();
                 greatRow = board.transformSeigeRow;
             }
             //-------------
             if(oppMeleeSum == maxRowOpp)
             {
-                greatOppSumRow = board.opponentTransformMeleeRow.GetComponents<DisplayCard>();
+                greatOppSumRow = board.opponentTransformMeleeRow.GetComponentsInChildren<DisplayCard>();
                 greatOppRow = board.opponentTransformMeleeRow;
             }  
             else if(oppRangedSum == maxRowOpp)
             {
-                greatOppSumRow = board.opponentTransformRangedRow.GetComponents<DisplayCard>();
+                greatOppSumRow = board.opponentTransformRangedRow.GetComponentsInChildren<DisplayCard>();
                 greatOppRow = board.opponentTransformRangedRow;
             }
             else
             {
-                greatOppSumRow = board.opponentTransformSeigeRow.GetComponents<DisplayCard>();
+                greatOppSumRow = board.opponentTransformSeigeRow.GetComponentsInChildren<DisplayCard>();
                 greatOppRow = board.opponentTransformSeigeRow;
             }
             //------------    
@@ -512,22 +491,24 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
             {
                 if(greatSumRow.Length != greatOppSumRow.Length)
                 {
-                    DivideAttack(greatOppRow,Math.Abs(greatSumRow.Length - greatOppSumRow.Length));
+                    DivideAttack(greatOppRow,Math.Max(greatSumRow.Length, greatOppSumRow.Length));
                 }
                 else
                 {
-                    DivideAttack(greatOppRow, 1);
+                    if(greatSumRow.Length != 0) DivideAttack(greatOppRow, greatSumRow.Length);
+                    else DivideAttack(greatOppRow, 1);
                 }
             }
             else
             {
                 if(greatSumRow.Length != greatOppSumRow.Length)
                 {
-                    DivideAttack(greatRow,Math.Abs(greatSumRow.Length - greatOppSumRow.Length));
+                    DivideAttack(greatRow,Math.Max(greatSumRow.Length, greatOppSumRow.Length));
                 }
                 else
                 {
-                    DivideAttack(greatRow, 1);
+                    if(greatSumRow.Length != 0) DivideAttack(greatRow, greatSumRow.Length);
+                    else DivideAttack(greatRow, 1);
                 }
             }
         }
@@ -610,7 +591,8 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         for(int i = 0; i < rowsNames.Length; i++)
         {
             GameObject buttonRow = Instantiate(cardButtonPrefab, cardListContainer);
-            buttonRow.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => GiveValueToSelectedRow(rowsNames[i], activingC));
+            string rowName = rowsNames[i];
+            buttonRow.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => GiveValueToSelectedRow(rowName, activingC));
         }
         cardSelectionPanel.SetActive(true);
     }
@@ -621,33 +603,40 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         {
             case "Melee" :
                 selectedRow = board.transformMeleeRow;
+                Debug.Log(selectedRow);
                 break;
             case "Ranged" :
                 selectedRow = board.transformRangedRow;
+                Debug.Log(selectedRow);
                 break;
             case "Seige" :
                 selectedRow = board.transformSeigeRow;
+                Debug.Log(selectedRow);
                 break;
             case "OppMelee" :
                 selectedRow = board.opponentTransformMeleeRow;
+                Debug.Log(selectedRow);
                 break;
             case "OppRanged" :
                 selectedRow = board.opponentTransformRangedRow;
+                Debug.Log(selectedRow);
                 break;
             case "OppSeige" :
                 selectedRow = board.opponentTransformSeigeRow;
+                Debug.Log(selectedRow);
                 break;
             default :
                 selectedRow = null;
                 break;  
         }
+        Debug.Log(selectedRow);
         switch(activingC.card.name)
         {
             case "Shoko Ieiri" :
                 IncreaseAttackByTwo(selectedRow);
                 break;
             case "Jogo":
-                ReduceByFive(activeCard, selectedRow);
+                ReduceByFive(activingC.gameObject, selectedRow);
                 break;
             case "Autoencarnacion de la perfeccion" :
                 ChangeToLower(selectedRow);
@@ -715,17 +704,22 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
 
     private int CalculateSum(Transform row)
     {
-        if(row == board.transformMeleeRow || row == board.transformRangedRow || row == board.transformSeigeRow
-            || row == board.opponentTransformMeleeRow || row == board.opponentTransformRangedRow || row == board.opponentTransformSeigeRow)
-            {
-                int sum = 0;
-                DisplayCard[] cards = row.GetComponentsInChildren<DisplayCard>();
-                foreach(DisplayCard c in cards)
-                {
-                    sum += c.card.GetPower();
-                }
-                return sum;  
-            }
-        else return -1;
+        int sum = 0;
+        DisplayCard[] cards = row.GetComponentsInChildren<DisplayCard>();
+        foreach(DisplayCard c in cards)
+        {
+            sum += c.card.GetPower();
+        }
+        return sum;  
     } 
+
+    //Borrar este metodo 
+    private void SeeAttack(Transform row)
+    {
+        DisplayCard[] auxCards = row.GetComponentsInChildren<DisplayCard>();
+        foreach(DisplayCard c in auxCards)
+        {
+            Debug.Log(c.card.GetPower());
+        }
+    }
 }

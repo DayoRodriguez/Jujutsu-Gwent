@@ -122,7 +122,7 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
     private void OnCardSelected(DisplayCard selectedC)
     {
         Transform ownerHand = selectedC.card.owner == Card.Owner.Player ? board.transformPlayerHand : board.opponentTransformPlayerHand;
-
+            
         AddCardToHand(selectedC, ownerHand);
 
         cardSelectionPanel.SetActive(false);

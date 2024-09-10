@@ -46,16 +46,4 @@ public class UnitCard : Card
         return this.power;
     }
 
-    /*public UnitCard(int id, string name, string effect, string faction, string type, int power, string kindAttack1, string kindAttack2, string kindAttack3)
-    {
-        this.id = id;
-        this.name = name;
-        this.effect = effect;
-        this.faction = faction;
-        this.type = type;
-        this.power = power;
-        this.kindAttack1 = kindAttack1;
-        this.kindAttack2 = kindAttack2;
-        this.kindAttack3 = kindAttack3;
-    }*/
 }

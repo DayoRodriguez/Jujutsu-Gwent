@@ -11,6 +11,9 @@ public class ActivateLeaderEffect : MonoBehaviour
     public Transform leaderOppSlot;
 
     private BoardManager board;
+
+    private bool playerLeaderEffectActivate = false;
+    private bool oppLeaderEffectActivate = false;
     void Start()
     {
         activeEffect = FindObjectOfType<CardEffects>();
@@ -19,15 +22,23 @@ public class ActivateLeaderEffect : MonoBehaviour
 
     public void ActivateLeaderplayerEffect()
     {
-        DisplayCard playerLeader = leaderPlayerSlot.GetComponentInChildren<DisplayCard>();
-        activeEffect.Execute(playerLeader.gameObject);
-        board.playerHasPerformedAction = true;
+        if(!playerLeaderEffectActivate)
+        {
+            DisplayCard playerLeader = leaderPlayerSlot.GetComponentInChildren<DisplayCard>();
+            activeEffect.Execute(playerLeader.gameObject);
+            board.playerHasPerformedAction = true;
+            playerLeaderEffectActivate = true;
+        }
     }
 
     public void ActivateOppLeaderEffect()
     {
-        DisplayCard oppLeader = leaderOppSlot.GetComponentInChildren<DisplayCard>();
-        activeEffect.Execute(oppLeader.gameObject);
-        board.opponentHasPerformedAction = true;
+        if(!oppLeaderEffectActivate)
+        {
+            DisplayCard oppLeader = leaderOppSlot.GetComponentInChildren<DisplayCard>();
+            activeEffect.Execute(oppLeader.gameObject);
+            board.opponentHasPerformedAction = true;
+            oppLeaderEffectActivate = true;
+        }
     }
 }
