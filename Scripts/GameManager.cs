@@ -6,8 +6,11 @@ using System;
 
 public class GameManager : MonoBehaviour
 {
-  public enum GameState{FirstDraw, RockPaperScissors, PlayerTurn, OpponentTurn, RoundEnd, GameEnd}
+  public enum GameState{FirstDraw, RockPaperScissors, PlayerTurn, OpponentTurn, RoundEnd, GameEnd, Draw}
   public GameState actualState;
+
+  //public bool isMulliganPhase = false;
+  private AudioSource musicControler;
 
   public bool playerHasWonRPS = false;
 
@@ -17,23 +20,35 @@ public class GameManager : MonoBehaviour
   private bool playerhaspass = false;
   private bool opponenthaspass = false;
 
-  public BoardManager boardManager;
+  public BoardManager board;
   public Text RoundResoultText;
   public Text PlayerPower;
   public Text OpponentPower;
 
   public GameObject rockPaperScissorsPanel;
-  public GameObject RPSwinnerPanel;
+  public GameObject winnerPanel;
   public Text rockPaperScissorsText;
-  public Text RPSwinnerText;
+  public Text winnerText;
   private string playerChoice = "";
   private string opponentChoice = "";
+
+  PlayerDeck playerDeck;
+
+  int playerPower = 0;
+  int opponentPower = 0;
 
   void Start()  
   {
     actualState = GameState.RockPaperScissors;
+    playerDeck = FindObjectOfType<PlayerDeck>();
+    board = FindObjectOfType<BoardManager>();
     StartCoroutine(TurnManager());
   }
+
+  // void Update()
+  // {
+  
+  // }
   IEnumerator TurnManager()
   {
     while(actualState != GameState.GameEnd)
@@ -52,6 +67,9 @@ public class GameManager : MonoBehaviour
         case GameState.OpponentTurn :
           yield return StartCoroutine(OpponentTurn());
           break;
+        case GameState.Draw :
+          yield return StartCoroutine(Draw());
+          break;    
         case GameState.RoundEnd :
           yield return StartCoroutine(RoundEnd());
           break;        
@@ -63,10 +81,24 @@ public class GameManager : MonoBehaviour
 
   IEnumerator FirstDraw()
   {
-    PlayerDeck playerDeck = FindObjectOfType<PlayerDeck>();
-    playerDeck.FirstDraw(playerDeck.playerHand, playerDeck.playerDeck);
-    playerDeck.FirstDraw(playerDeck.opponentPlayerHand, playerDeck.opponentPlayerDeck);
-    yield return StartCoroutine(playerDeck.FirtsDrawPhases());
+    playerDeck.FirstDraw(board.transformPlayerHand, board.transformDeck);
+        musicControler = gameObject.AddComponent<AudioSource>();
+        musicControler.clip = board.gojoDominio;
+        musicControler.Play();
+        yield return new WaitForSeconds(2);
+        musicControler.clip = board.vacio;
+        musicControler.Play();
+        yield return new WaitForSeconds(3);
+    playerDeck.FirstDraw(board.opponentTransformPlayerHand, board.opponentTransformDeck);
+        musicControler.clip = board.sukunaDominio;
+        musicControler.Play();
+        yield return new WaitForSeconds(3);
+        musicControler.clip = board.templo;
+        musicControler.Play();
+        yield return new WaitForSeconds(3);
+    //yield return StartCoroutine(playerDeck.FirtsDrawPhases());
+    // yield return StartCoroutine(playerDeck.MulliganPhase(playerDeck.playerHand, playerDeck.playerDeck));
+    // yield return StartCoroutine(playerDeck.MulliganPhase(playerDeck.opponentPlayerHand, playerDeck.opponentPlayerDeck));
     yield return new WaitUntil(() => !playerDeck.StartedSMS.activeSelf);
     if(playerHasWonRPS) actualState = GameState.PlayerTurn;
     else actualState = GameState.OpponentTurn;
@@ -91,6 +123,26 @@ public class GameManager : MonoBehaviour
     rockPaperScissorsPanel.SetActive(false);
 
     yield return StartCoroutine(DeterminateRPSWinner());
+  }
+
+  IEnumerator Draw()
+  {
+    playerDeck.DrawCard(board.transformPlayerHand, board.transformDeck, 2);
+    playerDeck.DrawCard(board.opponentTransformPlayerHand, board.opponentTransformDeck, 2);
+    yield return StartCoroutine(playerDeck.MulliganPhase(board.transformPlayerHand, board.transformDeck));
+    yield return StartCoroutine(playerDeck.MulliganPhase(board.opponentTransformPlayerHand, board.opponentTransformDeck));
+    if(playerPower > opponentPower)
+    {
+      actualState = GameState.PlayerTurn;
+    }
+    else if(opponentPower > playerPower)
+    {
+      actualState = GameState.OpponentTurn;
+    }
+    else 
+    {
+      actualState = GameState.PlayerTurn; 
+    }
   }
 
   public void ChooseRock()
@@ -121,26 +173,26 @@ public class GameManager : MonoBehaviour
             (playerChoice == "Paper" && opponentChoice == "Rock") ||
             (playerChoice == "Scissors" && opponentChoice == "Paper"))
             {
-              RPSwinnerPanel.SetActive(true);
-              RPSwinnerText.text = "Player wins, Player's turn";
+              winnerPanel.SetActive(true);
+              winnerText.text = "Player wins, Player's turn";
               yield return new WaitForSeconds(1);
-              RPSwinnerPanel.SetActive(false);
+              winnerPanel.SetActive(false);
               playerHasWonRPS = true;
               actualState = GameState.FirstDraw;
             }
     else
     {
-      RPSwinnerPanel.SetActive(true);
-      RPSwinnerText.text = "Opponent wins, Opponent's turn";
+      winnerPanel.SetActive(true);
+      winnerText.text = "Opponent wins, Opponent's turn";
       yield return new WaitForSeconds(1);
-      RPSwinnerPanel.SetActive(false);
+      winnerPanel.SetActive(false);
       actualState = GameState.FirstDraw;
     }        
   }
 
   IEnumerator PlayerTurn()
   {
-    yield return new WaitUntil(() => playerhaspass || !boardManager.PlayerHasEarnigActions());
+    yield return new WaitUntil(() => playerhaspass || !board.PlayerHasEarnigActions());
 
     if(playerhaspass && opponenthaspass)
     {
@@ -155,7 +207,7 @@ public class GameManager : MonoBehaviour
   
   IEnumerator OpponentTurn()
   {
-    yield return new WaitUntil(() => opponenthaspass || !boardManager.OpponentHasEarningActions());
+    yield return new WaitUntil(() => opponenthaspass || !board.OpponentHasEarningActions());
 
     if(playerhaspass && opponenthaspass)
     {
@@ -169,24 +221,36 @@ public class GameManager : MonoBehaviour
   
   IEnumerator RoundEnd()
   {
-    int playerPower = Int32.Parse(PlayerPower.text);
-    int opponentPower = Int32.Parse(OpponentPower.text);
+    playerPower = Int32.Parse(PlayerPower.text);
+    opponentPower = Int32.Parse(OpponentPower.text);
 
     if(playerPower > opponentPower)
     {
         playerRoundWin++;
-        RoundResoultText.text = "Player has Won";
+
+        winnerPanel.SetActive(true);
+        yield return new WaitForSeconds(1);
+        winnerPanel.SetActive(false);
+        winnerText.text = "Player has Won";
     }
     else if(playerPower < opponentPower)
     {
         opponentRoundWin++;
-        RoundResoultText.text = "Opponent has Won";
+
+        winnerPanel.SetActive(true);
+        yield return new WaitForSeconds(1);
+        winnerPanel.SetActive(false);
+        winnerText.text = "Opponent has Won";
     }
     else
     {
         playerRoundWin++;
         opponentRoundWin++;
-        RoundResoultText.text = "There was a Draw";
+
+        winnerPanel.SetActive(true);
+        yield return new WaitForSeconds(1);
+        winnerPanel.SetActive(false);
+        winnerText.text = "There was a Draw";
     }
 
     yield return new WaitForSeconds(3);
@@ -194,7 +258,7 @@ public class GameManager : MonoBehaviour
     playerhaspass = false;
     opponenthaspass = false;
 
-    boardManager.CleanBoard();
+    board.CleanBoard();
 
     if((playerRoundWin >=2 && playerRoundWin > opponentRoundWin) || 
     (opponentRoundWin >= 2 && opponentRoundWin > playerRoundWin))
@@ -203,14 +267,7 @@ public class GameManager : MonoBehaviour
     }
     else
     {
-        if(playerPower > opponentPower)
-        {
-            actualState = GameState.PlayerTurn;
-        }
-        else if(opponentPower > playerPower)
-        {
-            actualState = GameState.OpponentTurn;
-        }
+        actualState = GameState.Draw; 
     }
   }
 
@@ -218,11 +275,11 @@ public class GameManager : MonoBehaviour
   {
     if(playerRoundWin >=2 && playerRoundWin > opponentRoundWin)
     {
-        RoundResoultText.text = "Player has Won the Game";
+      RoundResoultText.text = "Player has Won the Game";
     }
     else if(opponentRoundWin >= 2 && opponentRoundWin > playerRoundWin)
     {
-        RoundResoultText.text = "Opponent has won the Game";
+      RoundResoultText.text = "Opponent has won the Game";
     }
   }
 

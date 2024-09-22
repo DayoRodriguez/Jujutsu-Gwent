@@ -7,7 +7,9 @@ using UnityEngine.EventSystems;
 public class DisplayCard : MonoBehaviour
 {
     public Card card;
+
     private Image imageCard;
+
 
     void Awake()
     {

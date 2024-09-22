@@ -199,10 +199,13 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
     public void GreatVoid(GameObject activingCard)
     {
         DisplayCard activingC = activingCard.GetComponent<DisplayCard>();
+        Debug.Log("El owner de la carta es " + activingC.card.owner);
 
         if(activingC.card.owner == Card.Owner.Player)
         {
             DisplayCard liderC = board.transformLeaderCardSlot.GetComponentInChildren<DisplayCard>();
+            Debug.Log("El nombre de la carta es " + liderC.card.name);
+            Debug.Log("El owner de la carta es " + liderC.card.owner);
 
             if(!liderC.card.name.Equals("Satoru Gojo"))
             {
@@ -217,6 +220,9 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
         else
         {
             DisplayCard liderC = board.opponentTransformLeaderCardSlot.GetComponentInChildren<DisplayCard>();
+
+            Debug.Log("El nombre de la carta es " + liderC.card.name);
+            Debug.Log("El owner de la carta es " + liderC.card.owner);
 
             if(!liderC.card.name.Equals("Satoru Gojo"))
             {
@@ -316,7 +322,7 @@ public class DestroyCardEffect : MonoBehaviour , ICardEffect
     private int Sum(Transform Row)
     {
         int sum = 0;
-        DisplayCard[] cards = Row.GetComponents<DisplayCard>();
+        DisplayCard[] cards = Row.GetComponentsInChildren<DisplayCard>();
 
         if(cards.Length != 0)
         {

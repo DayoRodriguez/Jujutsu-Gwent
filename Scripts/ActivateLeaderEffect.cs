@@ -12,6 +12,8 @@ public class ActivateLeaderEffect : MonoBehaviour
 
     private BoardManager board;
 
+    private AudioSource musicControler;
+
     private bool playerLeaderEffectActivate = false;
     private bool oppLeaderEffectActivate = false;
     void Start()
@@ -25,6 +27,9 @@ public class ActivateLeaderEffect : MonoBehaviour
         if(!playerLeaderEffectActivate)
         {
             DisplayCard playerLeader = leaderPlayerSlot.GetComponentInChildren<DisplayCard>();
+            musicControler = gameObject.AddComponent<AudioSource>();
+            musicControler.clip = board.debil;
+            musicControler.Play();
             activeEffect.Execute(playerLeader.gameObject);
             board.playerHasPerformedAction = true;
             playerLeaderEffectActivate = true;
@@ -36,6 +41,9 @@ public class ActivateLeaderEffect : MonoBehaviour
         if(!oppLeaderEffectActivate)
         {
             DisplayCard oppLeader = leaderOppSlot.GetComponentInChildren<DisplayCard>();
+            musicControler = gameObject.AddComponent<AudioSource>();
+            musicControler.clip = board.animo;
+            musicControler.Play();
             activeEffect.Execute(oppLeader.gameObject);
             board.opponentHasPerformedAction = true;
             oppLeaderEffectActivate = true;

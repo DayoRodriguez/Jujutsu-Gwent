@@ -11,33 +11,26 @@ public class PlayerDeck : MonoBehaviour
     private bool opponentLeaderInstantiated = false;
     private int handMaxSide = 10;
 
+    //private AudioSource musicControler;
+
     public GameObject Cards;
     public GameObject StartedSMS;
 
-    public Transform playerDeck;
-    public Transform opponentPlayerDeck;
-
-    public Transform playerHand;
-    public Transform opponentPlayerHand;
-
-    public Transform leaderCard;
-    public Transform opponentLeaderCard;
-
-    private BoardManager board;
+    public BoardManager board;
 
     // Start is called before the first frame update
     void Start()
     {
         board = FindObjectOfType<BoardManager>();
 
-        DeckCreator(FactionSelection.Instance.playerFactionDeck, deck, ref playerLeaderInstantiated, leaderCard);
-        InstantiateDeck(deck, playerDeck); 
+        DeckCreator(FactionSelection.Instance.playerFactionDeck, deck, ref playerLeaderInstantiated, board.transformLeaderCardSlot);
+        InstantiateDeck(deck, board.transformDeck); 
 
-        DeckCreator(FactionSelection.Instance.opponentFactionDeck, opponentDeck, ref opponentLeaderInstantiated, opponentLeaderCard);  
-        InstantiateDeck(opponentDeck, opponentPlayerDeck);
+        DeckCreator(FactionSelection.Instance.opponentFactionDeck, opponentDeck, ref opponentLeaderInstantiated, board.opponentTransformLeaderCardSlot);  
+        InstantiateDeck(opponentDeck, board.opponentTransformDeck);
 
-        // FirstDraw(PlayerHand,playerDeck);
-        // FirstDraw(OpponentPlayerHand,OpponentPlayerDeck);
+        // FirstDraw(playerHand,playerDeck);
+        // FirstDraw(opponentPlayerHand,opponentPlayerDeck);
 
         // StartCoroutine(FirtsDrawPhases());
 ;    }
@@ -162,13 +155,13 @@ public class PlayerDeck : MonoBehaviour
                 selectedCard.gameObject.AddComponent<CardLogic>();
             }
             
-            if(hand == playerHand)
+            if(hand == board.transformPlayerHand)
             {
                 selectedCard.card.owner = Card.Owner.Player;
                 Debug.Log("La carta es" + selectedCard.card.name);
                 Debug.Log("La carta esta en la mano del " + selectedCard.card.owner.ToString());
             }
-            else if(hand == opponentPlayerHand)
+            else if(hand == board.opponentTransformPlayerHand)
             {
                 selectedCard.card.owner = Card.Owner.Opponent;
                 Debug.Log("La carta es" + selectedCard.card.name);
@@ -189,15 +182,28 @@ public class PlayerDeck : MonoBehaviour
     private IEnumerator StartMulliganPhase()
     {
         //Fase Mulligan de Player
-        yield return StartCoroutine(MulliganPhase(playerHand, playerDeck));
+        // musicControler = gameObject.AddComponent<AudioSource>();
+        // musicControler.clip = board.gojoDominio;
+        // musicControler.Play();
+        // yield return new WaitForSeconds(1);
+        // musicControler.clip = board.vacio;
+        // musicControler.Play();
+        // yield return new WaitForSeconds(1);
+        yield return StartCoroutine(MulliganPhase(board.transformPlayerHand, board.transformDeck));
 
         //Fase Mulligan de Opponent
-        yield return StartCoroutine(MulliganPhase(opponentPlayerHand, opponentPlayerDeck));
+        // musicControler.clip = board.sukunaDominio;
+        // musicControler.Play();
+        // yield return new WaitForSeconds(2);
+        // musicControler.clip = board.templo;
+        // musicControler.Play();
+        // yield return new WaitForSeconds(2);
+        yield return StartCoroutine(MulliganPhase(board.opponentTransformPlayerHand, board.opponentTransformDeck));
 
         Debug.Log("La fase de Mulligan ha sido completada");
     }
 
-    private IEnumerator MulliganPhase(Transform hand, Transform deck)
+    public IEnumerator MulliganPhase(Transform hand, Transform deck)
     {
         //Revisar por que este metodo no se ejecuta correctamente el cambio de cartas el comenzar la partida
         DisplayCard[] cardsInHand = hand.GetComponentsInChildren<DisplayCard>();
@@ -238,7 +244,7 @@ public class PlayerDeck : MonoBehaviour
                         cardH.transform.localRotation = Quaternion.identity;
                         cardH.transform.localScale = Vector3.one;
 
-                        DrawCard(hand, deck);
+                        DrawCard(hand, deck, 1);
                     }
                 }
                 yield return null;
@@ -253,28 +259,40 @@ public class PlayerDeck : MonoBehaviour
         StartedSMS.SetActive(false); 
     }
 
-    private void DrawCard(Transform hand, Transform deck)
+    public void DrawCard(Transform hand, Transform deck, int count)
     {
-        DisplayCard[] cardsToDraw = deck.GetComponentsInChildren<DisplayCard>();;
-        int selector = Random.Range(0, cardsToDraw.Length);
-        DisplayCard cardD = cardsToDraw[selector];
+        DisplayCard[] cardsToDraw = deck.GetComponentsInChildren<DisplayCard>();
+
+        for(int i = 0; i < count; i ++)
+        {    
+            
+            int selector = Random.Range(0, cardsToDraw.Length);
+            DisplayCard cardD = cardsToDraw[selector];
 
             if(cardD.gameObject.GetComponent<CardLogic>() == null)
             {
                 cardD.gameObject.AddComponent<CardLogic>();
             }
 
-        cardD.card.isActivated = true;
-        cardD.SetUp(cardD.card);
+            cardD.card.isActivated = true;
+            cardD.SetUp(cardD.card);
 
-        cardD.transform.SetParent(hand);
-        cardD.transform.localPosition = Vector3.zero;
-        cardD.transform.localRotation = Quaternion.identity;
-        cardD.transform.localScale = Vector3.one;
-        
-        if(hand == playerHand) cardD.card.owner = Card.Owner.Player;
-        if(hand == opponentPlayerHand) cardD.card.owner = Card.Owner.Opponent;
+            if(hand.childCount < 10)
+            {
+                cardD.transform.SetParent(hand);
+            }
+            else 
+            {
+                if(hand == board.transformPlayerHand) cardD.transform.SetParent(board.transformGraveyard);
+                else if(hand == board.opponentTransformPlayerHand) cardD.transform.SetParent(board.opponentTransformGraveyard);
+            }
+            cardD.transform.localPosition = Vector3.zero;
+            cardD.transform.localRotation = Quaternion.identity;
+            cardD.transform.localScale = Vector3.one;
 
+            if(hand == board.transformPlayerHand) cardD.card.owner = Card.Owner.Player;
+            else if(hand == board.opponentTransformPlayerHand) cardD.card.owner = Card.Owner.Opponent;
+        }
     }
 
     public DisplayCard[] RemovedCardFromArray(DisplayCard[] array, int index)

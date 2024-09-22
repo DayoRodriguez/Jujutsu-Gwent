@@ -2,7 +2,9 @@
     using System.Collections.Generic;
     using Unity.VisualScripting;
     using UnityEngine;
+    using UnityEngine.UI;
     using System;
+
     public class BoardManager : MonoBehaviour
     {
         public Transform transformMeleeRow;
@@ -43,8 +45,18 @@
 
         public CardEffects effectCard; 
 
+        public Image cardImageOnBoard;
+
         public bool playerHasPerformedAction = false;
         public bool opponentHasPerformedAction = false;
+
+        public AudioClip debil;
+        public AudioClip gojoDominio;
+        public AudioClip vacio;
+
+        public AudioClip animo;
+        public AudioClip sukunaDominio;
+        public AudioClip templo;
 
         void Start()
         {

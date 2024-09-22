@@ -592,6 +592,7 @@ public class ChangePowerEffect : MonoBehaviour , ICardEffect
         {
             GameObject buttonRow = Instantiate(cardButtonPrefab, cardListContainer);
             string rowName = rowsNames[i];
+            buttonRow.GetComponent<UnityEngine.UI.Image>().sprite = Resources.Load<Sprite>(rowName);
             buttonRow.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => GiveValueToSelectedRow(rowName, activingC));
         }
         cardSelectionPanel.SetActive(true);
