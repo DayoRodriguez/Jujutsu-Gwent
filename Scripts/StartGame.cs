@@ -9,6 +9,7 @@ public class StartGame : MonoBehaviour
     private AudioSource musicControler;
 
     public Button StartButton;
+    public Button EditorCardButton;
     public GameObject SelectionFactionPanel;
     public Text SelectionFactionText;
     public Image startImage;
@@ -27,6 +28,7 @@ public class StartGame : MonoBehaviour
         SelectionFactionText.text = "Player, Choose your Deck";
         startImage.sprite = Resources.Load<Sprite>("SelectionDeckWallper");
         StartButton.gameObject.SetActive(false);
+        EditorCardButton.gameObject.SetActive(false);
         SelectionFactionPanel.SetActive(true);
         SelectionFactionText.gameObject.SetActive(true);
     }
