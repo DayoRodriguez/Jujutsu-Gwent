@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-sealed class ParenthesizedExpressionSyntax : ExpresionSyntax
+public sealed class ParenthesizedExpressionSyntax : ExpresionSyntax
 {
     public override TokenType Type => TokenType.ParenExpression;
     public Token OpenParenToken{get;}

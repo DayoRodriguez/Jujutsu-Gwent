@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-sealed class SyntaxTree 
+public sealed class SyntaxTree 
 {
     public ExpresionSyntax Root{get;}
     public Token EndOfFileToken{get;}

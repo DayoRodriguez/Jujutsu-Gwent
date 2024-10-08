@@ -29,34 +29,34 @@ public class EditorCardController : MonoBehaviour
         {
             foreach(var tk in parser.Diagnostics)
             {
-                PrettyPrint(tk);
+                //PrettyPrint(tk);
             }
             break;
             //Debug.Log("La token es " + tk.Value + " es una token de tipo " + tk.Type);
         }
     }
 
-    void PrettyPrint(SyntaxNode node, string indent = "", bool isLast = false)
-    {
-        var marker = isLast ? "|--":"|----";
+    // void PrettyPrint(SyntaxNode node, string indent = "", bool isLast = false)
+    // {
+    //     var marker = isLast ? "|--":"|----";
 
-        Debug.Log(indent);
-        Debug.Log(marker);
-        Debug.Log(node.Type);
+    //     Debug.Log(indent);
+    //     Debug.Log(marker);
+    //     Debug.Log(node.Type);
 
-        if(node is SyntaxToken t && t.Value != null)
-        {
-            Debug.Log(" ");
-            Debug.Log(t.Value);
-        }
+    //     if(node is SyntaxToken t && t.Value != null)
+    //     {
+    //         Debug.Log(" ");
+    //         Debug.Log(t.Value);
+    //     }
 
-        indent += isLast ? "  " : "|  ";
+    //     indent += isLast ? "  " : "|  ";
         
-        var lastChild = node.GetChildren();
+    //     var lastChild = node.GetChildren();
 
-        foreach(var child in node.GetChildren())
-        {
-            PrettyPrint(child, indent, child == lastChild);
-        } 
-    }
+    //     foreach(var child in node.GetChildren())
+    //     {
+    //         PrettyPrint(child, indent, child == lastChild);
+    //     } 
+    // }
 }
