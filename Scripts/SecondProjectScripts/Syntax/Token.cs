@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Linq;
+using System;
 
 public sealed class Token : SyntaxNode 
 {
@@ -10,19 +11,40 @@ public sealed class Token : SyntaxNode
     public string Text{get;}
     public int Position{get;}
     public object Value{get;}
+    public override TextSpan Span => new TextSpan(Position, Text.Length);
+    public override TextSpan FullSpan
+    {
+        get
+        {
+            var start = LeadingTrivia.Count() == 0
+                            ? Span.Start
+                            : LeadingTrivia.First().Span.Start;
+            var end = TrailingTrivia.Count() == 0
+                            ? Span.End
+                            : TrailingTrivia.Last().Span.End;
+            return TextSpan.FromBounds(start, end);
+        }
+    }
+    public bool IsMissing { get; }
 
-    public Token(SyntaxTree syntaxTree, TokenType type, string text, int position, object value)
+    public Token(SyntaxTree syntaxTree, TokenType type, int position, string text, object value, IEnumerable<SyntaxTrivia> leadingTrivia, IEnumerable<SyntaxTrivia> trailingTrivia)
     : base (syntaxTree)
     {
         Type = type;
         Text = text;
         Value = value;
+        IsMissing = text == null;
         Position = position;
+        LeadingTrivia = leadingTrivia;
+        TrailingTrivia = trailingTrivia;
     }
+
+    public IEnumerable<SyntaxTrivia> LeadingTrivia { get;}
+    public IEnumerable<SyntaxTrivia> TrailingTrivia { get; }
 
     public override IEnumerable<SyntaxNode> GetChildren()
     {
-        return Enumerable.Empty<SyntaxNode>();
+        return Array.Empty<SyntaxNode>();
     }
 }
 
@@ -69,7 +91,20 @@ public enum TokenType
     UnaryExpresion,
     BinaryExpresion,
     LiteralExpresion,
+    CallExpression,
+     // Statements
+    BlockStatement,
+    VariableDeclaration,
+    IfStatement,
+    WhileStatement,
+    DoWhileStatement,
+    ForStatement,
+    BreakStatement,
+    ContinueStatement,
+    ReturnStatement,
+    ExpressionStatement,
 
+    SkippedTextTrivia,
     LineBreakTrivia,
     WhitespaceTrivia,
     SingleLineCommentTrivia,
@@ -83,8 +118,8 @@ public enum TokenType
     Bool,
 
     //KeyWords 
-    True,
-    False, 
+    TrueKeyword,
+    FalseKeyword, 
     BreakKeyword,
     ContinueKeyword,
     ElseKeyword,
@@ -93,8 +128,8 @@ public enum TokenType
     IfKeyword,
     ReturnKeyword,
     LetKeyword,
-    ReturnKeyword,
     ToKeyword,
     VarKeyword,
-    DoKeyword
+    DoKeyword,
+    WhileKeyword
 }
