@@ -11,5 +11,16 @@ public enum BoundNodeKind
 {
     UnaryExpression,
     BinaryExpression,
-    LiteralExpression
+    LiteralExpression,
+    VariableExpression,
+    AssignmentExpression,
+    CallExpression,
+    ConversionExpression,
+    ExpressionStatement,
+    NopStatement,
+    VariableDeclaration,
+    GotoStatement,
+    ConditionalGotoStatement,
+    LabelStatement,
+    ReturnStatement  
 }

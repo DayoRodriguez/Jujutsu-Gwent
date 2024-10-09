@@ -53,7 +53,7 @@ public class DiagnosticsBag : IEnumerable<Diagnostics>
         ReportError(location, message);
     }
 
-    public void ReportUnexpectedToken(TextLocation location, SyntaxKind actualKind, SyntaxKind expectedKind)
+    public void ReportUnexpectedToken(TextLocation location, TokenType actualKind, TokenType expectedKind)
     {
         var message = $"Unexpected token <{actualKind}>, expected <{expectedKind}>.";
         ReportError(location, message);

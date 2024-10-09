@@ -131,5 +131,11 @@ public enum TokenType
     ToKeyword,
     VarKeyword,
     DoKeyword,
-    WhileKeyword
+    WhileKeyword,
+
+    CompilationUnit,
+    GlobalStatement,
+    Parameter,
+    TypeClause,
+    FunctionDeclaration
 }

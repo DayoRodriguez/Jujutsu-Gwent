@@ -98,31 +98,6 @@ internal sealed class Parser
         return new CompilationUnitSyntax(_syntaxTree, members, endOfFileToken);
     }
 
-    private IEnumerable<MemberSyntax> ParseMembers()
-    {
-        var members = IEnumerable<NumberSyntax>.CreateBuilder<MemberSyntax>();
-
-        while (Current.Type != TokenType.EOF)
-        {
-            var startToken = Current;
-
-            var member = ParseMember();
-            members.Add(member);
-
-                // If ParseMember() did not consume any tokens,
-                // we need to skip the current token and continue
-                // in order to avoid an infinite loop.
-                //
-                // We don't need to report an error, because we'll
-                // already tried to parse an expression statement
-                // and reported one.
-            if (Current == startToken)
-                NextToken();
-        }
-
-        return members.ToImmutable();
-    }
-
     private MemberSyntax ParseMember()
     {
         if (Current.Type == TokenType.FunctionKeyword)

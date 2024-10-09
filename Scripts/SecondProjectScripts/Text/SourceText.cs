@@ -81,7 +81,7 @@ public class SourceText
     public int GetLineIndex(int position)
     {
         var lower = 0;
-        var upper = Lines.Count() - 1;
+        var upper = Lines.Count - 1;
 
         while (lower <= upper)
         {

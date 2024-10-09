@@ -259,7 +259,7 @@ internal sealed class Evaluator
         {
             var max = (int)EvaluateExpression(node.Arguments[0])!;
             if (_random == null)
-                _random = new Random();
+                _random = new System.Random();
 
             return _random.Next(max);
         }

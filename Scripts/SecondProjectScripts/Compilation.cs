@@ -9,7 +9,7 @@ public sealed class Compilation
         private BoundGlobalScope? _globalScope;
         public bool IsScript { get; }
         public Compilation? Previous { get; }
-        public ReadOnlyCollection<SyntaxTree> SyntaxTrees { get; }
+        public IEnumerable<SyntaxTree> SyntaxTrees { get; }
         public FunctionSymbol? MainFunction => GlobalScope.MainFunction;
         public ReadOnlyCollection<FunctionSymbol> Functions => GlobalScope.Functions;
         //Implement a solution for my code in line 15?
@@ -20,7 +20,7 @@ public sealed class Compilation
         {
             IsScript = isScript;
             Previous = previous;
-            SyntaxTrees = ReadOnlyCollection<SyntaxTree>.CopyTo(syntaxTrees, 0);
+            SyntaxTrees = IEnumerable<SyntaxTree>.CopyTo(syntaxTrees, 0);
         }
 
         public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables)
@@ -29,16 +29,6 @@ public sealed class Compilation
                 return new EvaluationResult(GlobalScope.Diagnostics, null);
 
             var program = GetProgram();
-
-            // var appPath = Environment.GetCommandLineArgs()[0];
-            // var appDirectory = Path.GetDirectoryName(appPath);
-            // var cfgPath = Path.Combine(appDirectory, "cfg.dot");
-            // var cfgStatement = !program.Statement.Statements.Any() && program.Functions.Any()
-            //                       ? program.Functions.Last().Value
-            //                       : program.Statement;
-            // var cfg = ControlFlowGraph.Create(cfgStatement);
-            // using (var streamWriter = new StreamWriter(cfgPath))
-            //     cfg.WriteTo(streamWriter);
 
             if (program.Diagnostics.HasErrors())
                 return new EvaluationResult(program.Diagnostics, null);
