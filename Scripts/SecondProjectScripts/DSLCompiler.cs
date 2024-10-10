@@ -1,38 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DSLCompiler : MonoBehaviour
 {
-    // public string dslInput;
+    public GameObject CodeArea;
+    public GameObject Console;
 
-    // //Lista de cartas y efectos que se crean
-    // public List<Card> cards = new List<Card>();
-    // public List<Effect> effects = new List<Effect>();
+    public TMP_InputField input;
+    public TMP_InputField consoleText;
 
-    // //Metodo para iniciar el proceso de compilacion
-    // public void CompileDSL()
-    // {
-    //     //Analizqa el lexico convertimos la entrada en tokens
-    //     List<Token> tokens = Tokenize(dslInout);
+    public Button compilerButton;
+    public Button exitButton;
 
-    //     //Analisis Sintactico, creamos el Ast a partir de los tokens
-    //     AstNode ast = Parse(tokens);
-
-    //     //Iterpretacion o ejecucion : Convertimos el Ast en objetos del juego
-    //     Interpret(ast); 
-    // }
-
-    // private List<Token> Tokenize()
-    // {
-    //     return new List<Token>();
-    // }
-    // private ASTNode Parse(List<Token> tokens)
-    // {
-    //     return new AstNode();
-    // }
-    // private void Interpret()
-    // {
-
-    // }
+    private void Compile()
+    {
+        string code = input.text;
+        string console_code = consoleText.text;
+        DSL.Compile(code);
+    }
 }
