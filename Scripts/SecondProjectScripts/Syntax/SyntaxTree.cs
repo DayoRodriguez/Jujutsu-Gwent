@@ -12,7 +12,7 @@ public sealed class SyntaxTree
 
     private delegate void ParseHandler(SyntaxTree syntaxTree,
                                        out CompilationUnitSyntax root,
-                                       out ImmutableArray<Diagnostic> diagnostics);
+                                       out IEnumerable<Diagnostics> diagnostics);
 
     private SyntaxTree(SourceText text, ParseHandler handler)
     {
@@ -25,7 +25,7 @@ public sealed class SyntaxTree
     }
 
     public SourceText Text { get; }
-    public ReadOnlyCollection<Diagnostics> Diagnostics { get; }
+    public IEnumerable<Diagnostics> Diagnostics { get; }
     public CompilationUnitSyntax Root { get; }
 
     public static SyntaxTree Load(string fileName)
@@ -35,7 +35,7 @@ public sealed class SyntaxTree
         return Parse(sourceText);
     }
 
-    private static void Parse(SyntaxTree syntaxTree, out CompilationUnitSyntax root, out ReadOnlyCollection<Diagnostics> diagnostics)
+    private static void Parse(SyntaxTree syntaxTree, out CompilationUnitSyntax root, out IEnumerable<Diagnostics> diagnostics)
     {
         var parser = new Parser(syntaxTree);
         root = parser.ParseCompilationUnit();
@@ -74,7 +74,7 @@ public sealed class SyntaxTree
     {
         var tokens = new List<Token>();
 
-        void ParseTokens(SyntaxTree st, out CompilationUnitSyntax root, out ReadOnlyCollection<Diagnostics> d)
+        void ParseTokens(SyntaxTree st, out CompilationUnitSyntax root, out IEnumerable<Diagnostics> d)
         {
             var l = new Lexer(st);
             while (true)

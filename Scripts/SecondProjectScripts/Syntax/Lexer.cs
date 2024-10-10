@@ -1,499 +1,256 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
-internal sealed class Lexer
+public class Lexer
 {
-    private readonly string text;
-    private readonly SyntaxTree _syntaxTree;
-    private readonly SourceText _text;
-    private int position;
-    private List<string> diagnostics = new List<string>();
+    string code;
 
-    private int _start;
-    private TokenType _type;
-    private object? _value;
-    private IEnumerable<SyntaxTrivia>.Builder _triviaBuilder = IEnumerable.CreateBuilder<SyntaxTrivia>();
-    public IEnumerable<string> Diagnostics => diagnostics;
+    private static Dictionary<string, TokenType> keywords = new Dictionary<string, TokenType> {
+        
+        //effect
+        {"effect", TokenType.effect},
+        {"Name", TokenType.Name},
+        {"Params", TokenType.Params},
+        {"Number", TokenType.Number},
+        {"String", TokenType.String},
+        {"Bool", TokenType.Bool},
+        {"Action", TokenType.Action},
+        //{"targets", TokenType.targets},
+        //{"context", TokenType.context},
+        {"TriggerPlayer", TokenType.TriggerPlayer},
+        {"Board", TokenType.Board},
+        {"HandOfPlayer", TokenType.HandOfPlayer},
+        {"FieldOfPlayer", TokenType.FieldOfPlayer},
+        {"GraveyardOfPlayer", TokenType.GraveyardOfPlayer},
+        {"DeckOfPlayer", TokenType.DeckOfPlayer},
+        {"Hand", TokenType.Hand},
+        {"Deck", TokenType.Deck},
+        {"Field", TokenType.Field},
+        {"Graveyard", TokenType.Graveyard},
+        {"Owner", TokenType.Owner},
+        {"Find", TokenType.Find},
+        {"Push", TokenType.Push},
+        {"SendBottom", TokenType.SendBottom},
+        {"Pop", TokenType.Pop},
+        {"Remove", TokenType.Remove},
+        {"Shuffle", TokenType.Shuffle},
 
-    private char Current => Peek(0);
-    private char Lookahead => Peek(1);
-    public Lexer(string input)
+        //card
+        {"card", TokenType.Card},
+        {"Type", TokenType.Type},
+        {"Faction", TokenType.Faction},
+        {"Power", TokenType.Power},
+        {"Range", TokenType.Range},
+        {"OnActivation", TokenType.OnActivation},
+        {"Effect", TokenType.Effect},
+        {"Selector", TokenType.Selector},
+        {"Source", TokenType.Source},
+        {"Single", TokenType.Single},
+        {"Predicate", TokenType.Predicate},
+        {"PostAction", TokenType.PostAction},
+        
+        //
+        {"for", TokenType.For},
+        {"while", TokenType.While},
+        {"in", TokenType.In},
+        {"false", TokenType.False},
+        {"true", TokenType.True},
+    };
+    List<Token> tokens = new List<Token>();
+    int start = 0;
+    int current = 0;
+    int line = 1;
+    int column = 1;
+
+    //Constructor de la clase
+    public Lexer(string code)
     {
-        text = input;
+        this.code = code;
     }
 
-    private char Peek(int offset)
+    //Obteniendo lista de tokens
+    public List <Token> GetTokens()
     {
-        var index = position + offset;
+        while (!EOF())
+        {
+            start = current;
+            GetToken();
+        }
 
-        if(index >= text.Length)
-            return '\0';
-
-        return text[index];    
+        tokens.Add(new Token(TokenType.EOF, "", null!, line, column));
+        return tokens;
     }
 
-    private void Advance()
+    //Obtener un token
+    void GetToken()
     {
-        position++;
+        char currentCharacter = Next();
+        switch (currentCharacter)
+        {
+            case '(': AddToken(TokenType.OpenParen, null); break;
+            case ')': AddToken(TokenType.ClosedParen, null); break;
+            case '[': AddToken(TokenType.OpenBracket, null); break;
+            case ']': AddToken(TokenType.ClosedBracket, null); break;
+            case '{': AddToken(TokenType.OpenBrace, null); break;
+            case '}': AddToken(TokenType.ClosedBrace, null); break;
+            case ',': AddToken(TokenType.ValueSeparator, null); break;
+            case '.': AddToken(TokenType.Dot, null); break;
+            case ';': AddToken(TokenType.StatementSeparator, null); break;
+            case ':': AddToken(TokenType.AssignParams, null); break;
+            case '^': AddToken(TokenType.Pow, null); break;
+            case '%': AddToken(TokenType.Mod, null); break;
+            case '!':
+                AddToken(Match('=') ? TokenType.ExclamationEqual : TokenType.Exclamation, null);
+                break;
+            case '=':
+                AddToken(Match('=') ? TokenType.EqualEqual : Match('>') ? TokenType.Arrow : TokenType.Equal, null);
+                break;
+            case '<':
+                AddToken(Match('=') ? TokenType.LessEqual : TokenType.Less, null);
+                break;
+            case '>':
+                AddToken(Match('=') ? TokenType.GreaterEqual : TokenType.Greater, null);
+                break;
+            case '+':
+                AddToken(Match('=') ? TokenType.AddEqual : Match('+') ? TokenType.Increment : TokenType.Add, null);
+                break;
+            case '-':
+                AddToken(Match('=') ? TokenType.SubEqual : Match('-') ? TokenType.Decrement : TokenType.Sub, null);
+                break;
+            case '*':
+                AddToken(Match('=') ? TokenType.MulEqual :  TokenType.Mul, null);
+                break;
+            case '@':
+                AddToken(Match('=') ? TokenType.ConcatEqual : Match('@') ? TokenType.ConcatConcat : TokenType.Concat, null);
+                break;
+            case '&':
+                if (Match('&')) AddToken(TokenType.And, null);
+                else DSL.Report(line, column, "", "Unexpected character: " + currentCharacter);
+                break;
+            case '|':
+                if (Match('|')) AddToken(TokenType.Or, null);
+                else DSL.Report(line, column, "", "Unexpected character: " + currentCharacter);
+                break;
+            case '/':
+                if (Match('/'))
+                {
+                    while (Peek() != '\n' && !EOF()) Next();
+                }
+                else
+                {
+                    AddToken(Match('=') ? TokenType.DivEqual : TokenType.Div, null);
+                }
+                break;
+            case '"': GetString(); break;
+            case ' ':
+            case '\t':
+            case '\r': break;
+            case '\n':
+                line++;
+                column = 1;
+                break;
+            default:
+                if (IsDigit(currentCharacter)) GetNumber();
+                else if (IsAlpha(currentCharacter)) GetIdentifier();
+                else
+                {
+                    DSL.Report(line, column, "", "Unexpected character: " + currentCharacter);
+                }
+                break;
+        }
     }
 
-    public Token Tokenize()
+    
+    // Obtener un numero
+    void GetNumber()
     {
-        ReadTrivia(leading: true);
-
-        var leadingTrivia = _triviaBuilder.ToImmutable();
-        var tokenStart = position;
-
-        ReadToken();
-
-        var tokenKind = _type;
-        var tokenValue = _value;
-        var tokenLength = position - _start;
-
-        ReadTrivia(leading: false);
-
-        var trailingTrivia = _triviaBuilder.ToImmutable();
-
-        var tokenText = SyntaxFacts.GetText(tokenKind);
-        if (tokenText == null)
-           tokenText = _text.ToString(tokenStart, tokenLength);
-
-        return new Token(_syntaxTree, tokenKind, tokenStart, tokenText, tokenValue, leadingTrivia, trailingTrivia);
-                       
+        while (IsDigit(Peek())) Next();
+        object value = int.Parse(code.Substring(start, current - start));
+        AddToken(TokenType.NumberLiteral, value);
     }
-        private void ReadTrivia(bool leading)
-        {
-            _triviaBuilder.Clear();
 
-            var done = false;
-
-            while (!done)
-            {
-                _start = position;
-                _type = TokenType.BadToken;
-                _value = null;
-
-                switch (Current)
-                {
-                    case '\0':
-                        done = true;
-                        break;
-                    case '/':
-                        if (Lookahead == '/')
-                        {
-                            ReadSingleLineComment();
-                        }
-                        else if (Lookahead == '*')
-                        {
-                            ReadMultiLineComment();
-                        }
-                        else
-                        {
-                            done = true;
-                        }
-                        break;
-                    case '\n':
-                    case '\r':
-                        if (!leading)
-                            done = true;
-                        ReadLineBreak();
-                        break;
-                    case ' ':
-                    case '\t':
-                        ReadWhiteSpace();
-                        break;
-                    default:
-                        if (char.IsWhiteSpace(Current))
-                            ReadWhiteSpace();
-                        else
-                            done = true;
-                        break;
-                }
-
-                var length = position - _start;
-                if (length > 0)
-                {
-                    var text = _text.ToString(_start, length);
-                    var trivia = new SyntaxTrivia(_syntaxTree, _type, _start, text);
-                    _triviaBuilder.Add(trivia);
-                }
-            }
+    // Obtener un identificador
+    void GetIdentifier()
+    {
+        while (IsAlphaNumeric(Peek())) Next();
+        string lexeme = code.Substring(start, current - start);
+        if (keywords.ContainsKey(lexeme)){
+            if(lexeme == "false") AddToken(TokenType.False, false);
+            else if(lexeme=="true") AddToken(TokenType.True, true);
+            else AddToken(keywords[lexeme], null);
         }
-
-        private void ReadLineBreak()
-        {
-            if (Current == '\r' && Lookahead == '\n')
-            {
-                position += 2;
-            }
-            else
-            {
-                position++;
-            }
-
-            _type = TokenType.LineBreakTrivia;
-        }
-
-        private void ReadWhiteSpace()
-        {
-            var done = false;
-
-            while (!done)
-            {
-                switch (Current)
-                {
-                    case '\0':
-                    case '\r':
-                    case '\n':
-                        done = true;
-                        break;
-                    default:
-                        if (!char.IsWhiteSpace(Current))
-                            done = true;
-                        else
-                            position++;
-                        break;
-                }
-            }
-
-            _type = TokenType.WhitespaceTrivia;
-        }
-
-
-        private void ReadSingleLineComment()
-        {
-            position += 2;
-            var done = false;
-
-            while (!done)
-            {
-                switch (Current)
-                {
-                    case '\0':
-                    case '\r':
-                    case '\n':
-                        done = true;
-                        break;
-                    default:
-                        position++;
-                        break;
-                }
-            }
-
-            _type = TokenType.SingleLineCommentTrivia;
-        }
-
-        private void ReadMultiLineComment()
-        {
-            position += 2;
-            var done = false;
-
-            while (!done)
-            {
-                switch (Current)
-                {
-                    case '\0':
-                        var span = new TextSpan(_start, 2);
-                        var location = new TextLocation(_text, span);
-                        diagnostics.ReportUnterminatedMultiLineComment(location);
-                        done = true;
-                        break;
-                    case '*':
-                        if (Lookahead == '/')
-                        {
-                            position++;
-                            done = true;
-                        }
-                        position++;
-                        break;
-                    default:
-                        position++;
-                        break;
-                }
-            }
-
-            _type = TokenType.MultiLineCommentTrivia;
-        }
-
-        private void ReadToken()
-        {
-            _start = position;
-            _type = TokenType.BadToken;
-            _value = null;
-
-            switch (Current)
-            {
-                case '\0':
-                    _type = TokenType.EOF;
-                    break;
-                case '+':
-                    position++;
-                    if (Current != '=')
-                    {
-                        _type = TokenType.Plus;
-                    }
-                    else
-                    {
-                        _type = TokenType.PlusEqual;
-                        position++;
-                    }
-                    break;
-                case '-':
-                    position++;
-                    if (Current != '=')
-                    {
-                        _type = TokenType.Minus;
-                    }
-                    else
-                    {
-                        _type = TokenType.MinusEqual;
-                        position++;
-                    }
-                    break;
-                case '*':
-                    position++;
-                    if (Current != '=')
-                    {
-                        _type = TokenType.Star;
-                    }
-                    else
-                    {
-                        _type = TokenType.StarEqual;
-                        position++;
-                    }
-                    break;
-                case '/':
-                    position++;
-                    if (Current != '=')
-                    {
-                        _type = TokenType.Slash;
-                    }
-                    else
-                    {
-                        _type = TokenType.SlashEqual;
-                        position++;
-                    }
-                    break;
-                case '(':
-                    _type = TokenType.OpenParen;
-                    position++;
-                    break;
-                case ')':
-                    _type = TokenType.CloseParen;
-                    position++;
-                    break;
-                case '{':
-                    _type = TokenType.OpenBrace;
-                    position++;
-                    break;
-                case '}':
-                    _type = TokenType.CloseBrace;
-                    position++;
-                    break;
-                case ':':
-                    _type = TokenType.TwoPoints;
-                    position++;
-                    break;
-                case ',':
-                    _type = TokenType.Comma;
-                    position++;
-                    break;
-                case '~':
-                    _type = TokenType.Tilde;
-                    position++;
-                    break;
-                case '^':
-                    position++;
-                    if (Current != '=')
-                    {
-                        _type = TokenType.Hat;
-                    }
-                    else
-                    {
-                        _type = TokenType.HatEqual;
-                        position++;
-                    }
-                    break;
-                case '&':
-                    position++;
-                    if (Current == '&')
-                    {
-                        _type = TokenType.AmpersandAmpersand;
-                        position++;
-                    }
-                    else if (Current == '=')
-                    {
-                        _type = TokenType.AmpersandEqual;
-                        position++;
-                    }
-                    else
-                    {
-                        _type = TokenType.Ampersand;
-                    }
-                    break;
-                case '|':
-                    position++;
-                    if (Current == '|')
-                    {
-                        _type = TokenType.PipePipe;
-                        position++;
-                    }
-                    else if (Current == '=')
-                    {
-                        _type = TokenType.PipeEqual;
-                        position++;
-                    }
-                    else
-                    {
-                        _type = TokenType.Pipe;
-                    }
-                    break;
-                case '=':
-                    position++;
-                    if (Current != '=')
-                    {
-                        _type = TokenType.Equal;
-                    }
-                    else
-                    {
-                        _type = TokenType.EqualEqual;
-                        position++;
-                    }
-                    break;
-                case '!':
-                    position++;
-                    if (Current != '=')
-                    {
-                        _type = TokenType.Bang;
-                    }
-                    else
-                    {
-                        _type = TokenType.BangEqual;
-                        position++;
-                    }
-                    break;
-                case '<':
-                    position++;
-                    if (Current != '=')
-                    {
-                        _type = TokenType.Less;
-                    }
-                    else
-                    {
-                        _type = TokenType.LessEqual;
-                        position++;
-                    }
-                    break;
-                case '>':
-                    position++;
-                    if (Current != '=')
-                    {
-                        _type = TokenType.Greater;
-                    }
-                    else
-                    {
-                        _type = TokenType.GreaterEqual;
-                        position++;
-                    }
-                    break;
-                case '"':
-                    ReadString();
-                    break;
-                case '0': case '1': case '2': case '3': case '4':
-                case '5': case '6': case '7': case '8': case '9':
-                    ReadNumber();
-                    break;
-                case '_':
-                    ReadIdentifierOrKeyword();
-                    break;
-                default:
-                    if (char.IsLetter(Current))
-                    {
-                        ReadIdentifierOrKeyword();
-                    }
-                    else
-                    {
-                        var span = new TextSpan(position, 1);
-                        var location = new TextLocation(_text, span);
-                        diagnostics.ReportBadCharacter(location, Current);
-                        position++;
-                    }
-                    break;
-            }
-        }
-
-        private void ReadString()
-        {
-            // Skip the current quote
-            position++;
-
-            var sb = new StringBuilder();
-            var done = false;
-
-            while (!done)
-            {
-                switch (Current)
-                {
-                    case '\0':
-                    case '\r':
-                    case '\n':
-                        var span = new TextSpan(_start, 1);
-                        var location = new TextLocation(_text, span);
-                        diagnostics.ReportUnterminatedString(location);
-                        done = true;
-                        break;
-                    case '"':
-                        if (Lookahead == '"')
-                        {
-                            sb.Append(Current);
-                            position += 2;
-                        }
-                        else
-                        {
-                            position++;
-                            done = true;
-                        }
-                        break;
-                    default:
-                        sb.Append(Current);
-                        position++;
-                        break;
-                }
-            }
-
-            _type = TokenType.String;
-            _value = sb.ToString();
-        }
-
-        private void ReadNumber()
-        {
-            while (char.IsDigit(Current))
-                position++;
-
-            var length = position - _start;
-            var text = _text.ToString(_start, length);
-            if (!int.TryParse(text, out var value))
-            {
-                var span = new TextSpan(_start, length);
-                var location = new TextLocation(_text, span);
-                diagnostics.ReportInvalidNumber(location, text, TypeSymbol.Int);
-            }
-
-            _value = value;
-            _type = TokenType.Number;
-        }
-
-        private void ReadIdentifierOrKeyword()
-        {
-            while (char.IsLetterOrDigit(Current) || Current == '_')
-                position++;
-
-            var length = position - _start;
-            var text = _text.ToString(_start, length);
-            _type = SyntaxFacts.GetKeywordKind(text);
+        else AddToken(TokenType.Identifier, lexeme);
     }
+    bool IsDigit(char c)
+    {
+        return c >= '0' && c <= '9';
+    }
+
+    bool IsAlpha(char c)
+    {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+    }
+
+    bool IsAlphaNumeric(char c)
+    {
+        return IsAlpha(c) || IsDigit(c);
+    }
+
+    //Obtener String
+    private void GetString()
+    {   
+        //Avanzar hasta el final del string
+        while (Peek() != '"' && Peek() != '\n' && !EOF()) Next();
+        
+        if (EOF() || Peek() == '\n')
+        {
+            DSL.Report(line, column, "", "String no terminado");
+            if (Peek() == '\n')
+            {
+                line++;
+                column = 1;
+                Next();
+            }
+            return;
+        }
+        Next();
+        object value = code.Substring(start + 1, current - start - 2);
+        AddToken(TokenType.StringLiteral, value);
+    }
+
+    //Deveulve el caracter actual
+    char Peek()
+    {
+        if (EOF()) return '\0';
+        return code[current];
+    }
+
+    //Comprobar si coincide con el caracter esperado
+    bool Match(char c)
+    {
+        if (EOF()) return false;
+        if (code[current] != c) return false;
+        current++;
+        return true;
+    }
+
+    //Agregar un token a la lista
+    void AddToken(TokenType type, object value)
+    {
+        string lexeme = code.Substring(start, current - start);
+        tokens.Add(new Token(type, lexeme, value, line, column - lexeme.Length));
+    }
+
+    //Avanzar el puntero y Obtener el caracter en la posicion anteriror
+    char Next()
+    {
+        column++;
+        current++;
+        return code[current-1];
+    }
+    public bool EOF()
+    {
+        return current >= code.Length;
+    }
+
 }
-
-

@@ -1,141 +1,123 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
-using System.Linq;
-using System;
 
-public sealed class Token : SyntaxNode 
+public class Token
 {
-    public override TokenType Type{get;}
-    public string Text{get;}
-    public int Position{get;}
-    public object Value{get;}
-    public override TextSpan Span => new TextSpan(Position, Text.Length);
-    public override TextSpan FullSpan
+    public TokenType type;
+    public string lexeme;
+    public object literal;
+    public int line;
+    public int column;
+
+    // Constructor
+    public Token(TokenType type, string lexeme, object literal, int line, int column)
     {
-        get
-        {
-            var start = LeadingTrivia.Count() == 0
-                            ? Span.Start
-                            : LeadingTrivia.First().Span.Start;
-            var end = TrailingTrivia.Count() == 0
-                            ? Span.End
-                            : TrailingTrivia.Last().Span.End;
-            return TextSpan.FromBounds(start, end);
-        }
+        this.type = type;
+        this.lexeme = lexeme;
+        this.literal = literal;
+        this.line = line;
+        this.column = column;
     }
-    public bool IsMissing { get; }
-
-    public Token(SyntaxTree syntaxTree, TokenType type, int position, string text, object value, IEnumerable<SyntaxTrivia> leadingTrivia, IEnumerable<SyntaxTrivia> trailingTrivia)
-    : base (syntaxTree)
+    
+    public override string ToString()
     {
-        Type = type;
-        Text = text;
-        Value = value;
-        IsMissing = text == null;
-        Position = position;
-        LeadingTrivia = leadingTrivia;
-        TrailingTrivia = trailingTrivia;
-    }
-
-    public IEnumerable<SyntaxTrivia> LeadingTrivia { get;}
-    public IEnumerable<SyntaxTrivia> TrailingTrivia { get; }
-
-    public override IEnumerable<SyntaxNode> GetChildren()
-    {
-        return Array.Empty<SyntaxNode>();
+        string res = $"{type.ToString()} {lexeme}";
+        if (literal != null) res += " " + literal.ToString();
+        res += $" [ln {line}, col {column}]";
+        return res;
     }
 }
 
 public enum TokenType
 {
-    WhiteEspaceToken, // " "    
-    BadToken,
-    EOF,
-    Bang, // !
-    Pipe, // |
-    PipePipe, // ||
-    PipeEqual, // |=
-    Ampersand, //&
-    AmpersandAmpersand, // &&
-    AmpersandEqual, // &=
-    OpenParen, // (
-    CloseParen, // )
+    OpenParen, // ( 
+    ClosedParen, // )
+    OpenBracket, // [
+    ClosedBracket, // ]
+    OpenBrace, // {
+    ClosedBrace, // }
+    ValueSeparator, // , 
+    Dot, // .
+    AssignParams, // :
+    StatementSeparator, // ;
+    Mod, // %
+    Pow, // ^    
+    Exclamation, // !
+    ExclamationEqual, // !=
+    Add, // +
+    AddEqual, // +=
+    Increment, // ++
+    Sub, // -
+    SubEqual, // -=
+    Decrement, // --
+    Mul, // *
+    MulEqual, // *=
+    Div, // / 
+    DivEqual, // /=
     Equal, // =
-    EqualEqual, // == 
-    BangEqual, // !=
-    Hat, // ^
-    HatEqual, // ^=
-    Comma, // ,
-    TwoPoints, // :
-    Tilde, // ~
-    OpenBrace, //{
-    CloseBrace, //}
-
-    //Operators
-    Plus, // +
-    PlusEqual, // +=
-    Minus, // - 
-    MinusEqual, // -=
-    Star, // *
-    StarEqual, // *=
-    Slash, // /
-    SlashEqual, // /=
+    EqualEqual, // ==
+    Arrow, // =>
     Greater, // >
     GreaterEqual, // >=
     Less, // <
     LessEqual, // <=
-    //Expresion
-    ParenExpression,
-    UnaryExpresion,
-    BinaryExpresion,
-    LiteralExpresion,
-    CallExpression,
-     // Statements
-    BlockStatement,
-    VariableDeclaration,
-    IfStatement,
-    WhileStatement,
-    DoWhileStatement,
-    ForStatement,
-    BreakStatement,
-    ContinueStatement,
-    ReturnStatement,
-    ExpressionStatement,
+    Concat, // @ 
+    ConcatConcat, // @@ 
+    ConcatEqual, // @=
+    Or, // ||
+    And, // &&
 
-    SkippedTextTrivia,
-    LineBreakTrivia,
-    WhitespaceTrivia,
-    SingleLineCommentTrivia,
-    MultiLineCommentTrivia,
-    //Literal
+    // Literales
     Identifier, 
     StringLiteral, 
-    NumberLiteral,
-    Number,
-    String, 
-    Bool,
+    NumberLiteral, 
+    True, 
+    False,
 
-    //KeyWords 
-    TrueKeyword,
-    FalseKeyword, 
-    BreakKeyword,
-    ContinueKeyword,
-    ElseKeyword,
-    ForKeyword,
-    FunctionKeyword,
-    IfKeyword,
-    ReturnKeyword,
-    LetKeyword,
-    ToKeyword,
-    VarKeyword,
-    DoKeyword,
-    WhileKeyword,
+    // Keywords
+    //effect
+    effect,
+    Name,         
+    Params,         
+    Number,         
+    String,         
+    Bool,         
+    Action,            
+    TriggerPlayer,         
+    Board,         
+    HandOfPlayer,         
+    FieldOfPlayer,         
+    GraveyardOfPlayer,         
+    DeckOfPlayer,         
+    Hand,         
+    Deck,         
+    Field,         
+    Graveyard,         
+    Owner,         
+    Find,         
+    Push,         
+    SendBottom,         
+    Pop,         
+    Remove,         
+    Shuffle,        
 
-    CompilationUnit,
-    GlobalStatement,
-    Parameter,
-    TypeClause,
-    FunctionDeclaration
+    //card
+    Card,         
+    Type,         
+    Faction,       
+    Power,         
+    Range,         
+    OnActivation,   
+    Effect,         
+    Selector,       
+    Source,         
+    Single,         
+    Predicate,         
+    PostAction,         
+    
+    //-------------
+    For,
+    While,
+    In,
+    EOF
 }

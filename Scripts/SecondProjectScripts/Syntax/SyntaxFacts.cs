@@ -71,34 +71,52 @@ internal static class SyntaxFacts
     {
         switch(text)
         {
-            case "break":
-                return TokenType.BreakKeyword;
-            case "continue":
-                return TokenType.ContinueKeyword;
-            case "else":
-                return TokenType.ElseKeyword;
+            case "card":
+                return TokenType.Card;
+            case "effect":
+                return TokenType.effect;
+            case "Effect":
+                return TokenType.Effect;
             case "false":
                 return TokenType.FalseKeyword;
             case "for":
                 return TokenType.ForKeyword;
             case "function":
                 return TokenType.FunctionKeyword;
-            case "if":
-                return TokenType.IfKeyword;
-            case "let":
-                return TokenType.LetKeyword;
-            case "return":
-                return TokenType.ReturnKeyword;
-            case "to":
-                return TokenType.ToKeyword;
+            case "Params":
+                return TokenType.Params;
+            case "Action":
+                return TokenType.Action;
+            case "Type":
+                return TokenType.TypeProperty;
+            case "Name":
+                return TokenType.NameProperty;
             case "true":
                 return TokenType.TrueKeyword;
             case "var":
                 return TokenType.VarKeyword;
             case "while":
                 return TokenType.WhileKeyword;
-            case "do":
-                return TokenType.DoKeyword;
+            case "Faction":
+                return TokenType.FactionProperty;
+            case "Power" :
+                return TokenType.PowerProperty;
+            case "Range" :
+                return TokenType.RangeProperty;        
+            case "OnActivation" :
+                return TokenType.OnActivation;
+            case "Amount" :
+                return TokenType.AmountProperty;
+            case "Selector" :
+                return TokenType.Selector;
+            case "PostAction" :
+                return TokenType.PostAction;
+            case "Source" :
+                return TokenType.Source;
+            case "Single" :
+                return TokenType.Single;
+            case "Predicate" :
+                return TokenType.Predicate;
             default :
                 return TokenType.Identifier;    
         }
@@ -176,34 +194,34 @@ internal static class SyntaxFacts
                 return ":";
             case TokenType.Comma:
                 return ",";
-            case TokenType.BreakKeyword:
-                return "break";
-            case TokenType.ContinueKeyword:
-                return "continue";
-            case TokenType.ElseKeyword:
-                return "else";
+            // case TokenType.BreakKeyword:
+            //     return "break";
+            // case TokenType.ContinueKeyword:
+            //     return "continue";
+            // case TokenType.ElseKeyword:
+            //     return "else";
             case TokenType.FalseKeyword:
                 return "false";
             case TokenType.ForKeyword:
                 return "for";
             case TokenType.FunctionKeyword:
                 return "function";
-            case TokenType.IfKeyword:
-                return "if";
-            case TokenType.LetKeyword:
-                return "let";
-            case TokenType.ReturnKeyword:
-                return "return";
-            case TokenType.ToKeyword:
-                return "to";
+            // case TokenType.IfKeyword:
+            //     return "if";
+            // case TokenType.LetKeyword:
+            //     return "let";
+            // case TokenType.ReturnKeyword:
+            //     return "return";
+            // case TokenType.ToKeyword:
+            //     return "to";
             case TokenType.TrueKeyword:
                 return "true";
             case TokenType.VarKeyword:
                 return "var";
             case TokenType.WhileKeyword:
                 return "while";
-            case TokenType.DoKeyword:
-                return "do";
+            // case TokenType.DoKeyword:
+            //     return "do";
             default:
                 return null;
         }
