@@ -7,6 +7,8 @@
 
     public class BoardManager : MonoBehaviour
     {
+        public GameComponent board;
+
         public Transform transformMeleeRow;
         public Transform transformRangedRow;
         public Transform transformSeigeRow;
@@ -50,6 +52,9 @@
         public bool playerHasPerformedAction = false;
         public bool opponentHasPerformedAction = false;
 
+        public Player player1;
+        public Player player2;
+
         public AudioClip debil;
         public AudioClip gojoDominio;
         public AudioClip vacio;
@@ -62,6 +67,8 @@
         {
             gameManager = FindObjectOfType<GameManager>();
             effectCard = FindObjectOfType<CardEffects>();
+            player1 = new Player(Card.Owner.Player);
+            player2 = new Player(Card.Owner.Opponent);
         }
 
         public void ActiveCard(GameObject card, Transform row)

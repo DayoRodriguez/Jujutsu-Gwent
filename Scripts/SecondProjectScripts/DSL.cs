@@ -70,27 +70,26 @@ public static class DSL
         }
 
         foreach(var card in nodes.nodes.Where(n => n is CardNode).Select(n => (CardNode)n)){
-            Card newcard = null;
+            Card newCard = null;
             switch(card.type){
-                case Card.Type.Silver:
-                case Card.Type.Golden:
-                    newcard = new Unit(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, (int)card.power, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
+                case Card.Types.Silver:
+                case Card.Types.Golden:
+                    newCard = new UnitCard(50 + DataManager.myStringList.Count, card.name, null, card.faction, card.type, Resources.Load<Sprite>("DefaultUnitCardImage"), Resources.Load<Sprite>("CardBack"), (int)card.power, Tools.GetCardPositions(card.position), card.activation, 100, false);
+                    // newcard = new UnitCard(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, (int)card.power, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
                     break;
-                case Card.Type.Decoy:
-                    newcard = new Decoy(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, 0, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
+                case Card.Types.Increase:
+                    newCard = new EspecialCard(50 + DataManager.myStringList.Count, card.name, null, card.type, card.faction, Resources.Load<Sprite>("DefaultImage"), Resources.Load<Sprite>("CardBack"), Tools.GetCardPositions(card.position), card.activation, 100);
+                    // newCard = new EspecialCard(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, 0, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
                     break;
-                case Card.Type.Boost:
-                    newcard = new Boost(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, 0, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
+                case Card.Types.Weather:
+                    newCard = new EspecialCard(50 + DataManager.myStringList.Count, card.name, null, card.type, card.faction, Resources.Load<Sprite>("DefaultImage"), Resources.Load<Sprite>("CardBack"), Tools.GetCardPositions(card.position), card.activation, 100);
                     break;
-                case Card.Type.Weather:
-                    newcard = new Weather(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, 0, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
+                case Card.Types.Dump:
+                    newCard = new EspecialCard(50 + DataManager.myStringList.Count, card.name, null, card.type, card.faction, Resources.Load<Sprite>("DefaultImage"), Resources.Load<Sprite>("CardBack"), Tools.GetCardPositions(card.position), card.activation, 100);
                     break;
-                case Card.Type.Leader:
-                    newcard = new Leader(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, 0, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
-                    break;
-                case Card.Type.Clear:
-                    newcard = new Clear(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, 0, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
-                    break;
+                case Card.Types.Leader:
+                    newCard = new UnitCard(50 + DataManager.myStringList.Count, card.name, null, card.faction, card.type, Resources.Load<Sprite>("DefaultUnitCardImage"), Resources.Load<Sprite>("CardBack"), (int)card.power, Tools.GetCardPositions(card.position), card.activation, 100, true);
+                    break;    
             }
             if(card.activation.activations[0].effect.definition != "DrawCard"){
                 if(card.activation.activations[0].effect.parameters.parameters.Count > 0)
@@ -99,7 +98,7 @@ public static class DSL
                     DataManager.myAmountList[card.activation.activations[0].effect.definition] = x;
                 }
             }
-            DataManager.myStringList.Add(newcard);
+            DataManager.myStringList.Add(newCard);
         }
     }
 

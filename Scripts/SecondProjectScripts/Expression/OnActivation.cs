@@ -1,12 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [Serializable]
-public class Onactivation : IASTNode
+public class OnActivation : IASTNode
 {
     public static readonly List<TokenType> synchroTypes= new List<TokenType>() {TokenType.OpenBrace, TokenType.ClosedBracket, TokenType.ValueSeparator};
-    public Onactivation(List<EffectActivation> activations)
+    public OnActivation(List<EffectActivation> activations)
     {
         this.activations = activations;
     }

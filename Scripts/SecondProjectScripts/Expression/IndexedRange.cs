@@ -8,13 +8,15 @@ public class IndexedRange: IExpression
     public IExpression index;   
     public Token indexedToken;
     
-    public IndexedRange(IExpression range, IExpression index, Token indexedToken){
+    public IndexedRange(IExpression range, IExpression index, Token indexedToken)
+    {
         this.range = range;
         this.index = index;
         this.indexedToken = indexedToken;
     }
 
-    public object Evaluate(Context context, List<Card> targets){
+    public object Evaluate(Context context, List<Card> targets)
+    {
         return (range.Evaluate(context,targets) as List<Card.Position>)[(int)index.Evaluate(context,targets)];
     }
 }

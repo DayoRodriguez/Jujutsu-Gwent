@@ -7,12 +7,13 @@ using System.Linq.Expressions;
 [Serializable]
 public class EffectDefinition : IASTNode
 {
-    public static readonly List<TokenType> moduleTypes= new List<TokenType>() {
+    public static readonly List<TokenType> moduleTypes= new List<TokenType>() 
+    {
         TokenType.Name, TokenType.Params,
         TokenType.Action, TokenType.ClosedBrace
     };
     public string name;
-    public ParametersDefinition parameterDefs;
+    public ParameterDefinition parameterDefs;
     public Action action;
     public Token keyword;
 

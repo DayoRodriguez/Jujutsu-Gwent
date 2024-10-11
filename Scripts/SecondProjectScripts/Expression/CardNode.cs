@@ -12,9 +12,9 @@ public class CardNode : IASTNode
 
     public string name;
     public string faction;
-    public Card.Type? type;
+    public Card.Types? type;
     public int? power;
     public List<string> position;
-    public Onactivation activation;
+    public OnActivation activation;
     public Token keyword;
 }

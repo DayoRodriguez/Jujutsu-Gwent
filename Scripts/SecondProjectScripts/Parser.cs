@@ -124,7 +124,7 @@ public class Parser
     //Parse EffectActivation
     public EffectActivation ParseEffectActivation()
     {
-        Token check = Stream.Consume(TokenType.OpenBrace, "Expected '{'", Onactivation.synchroTypes);
+        Token check = Stream.Consume(TokenType.OpenBrace, "Expected '{'", OnActivation.synchroTypes);
         if (check == null) return null;
         EffectActivation activation = new EffectActivation();
         while (!Stream.Match(TokenType.ClosedBrace))
@@ -158,7 +158,7 @@ public class Parser
         }
         if (activation.effect == null)
         {
-            Stream.Error(Stream.tokens[Stream.position-1], "There are missing fields in EffectActivation", Onactivation.synchroTypes);
+            Stream.Error(Stream.tokens[Stream.position-1], "There are missing fields in EffectActivation", OnActivation.synchroTypes);
             return null;
         }
         return activation;
@@ -347,7 +347,7 @@ public class Parser
     
 
     // Analiza el campo de Onactivation de una card
-    public Onactivation ParseOnactivation()
+    public OnActivation ParseOnactivation()
     {
         List<EffectActivation> activations = new List<EffectActivation>();
         Token check = Stream.Consume(TokenType.AssignParams, "Expected ':' after Onactivation declaration", CardNode.synchroTypes);
@@ -359,10 +359,10 @@ public class Parser
             activations.Add(ParseEffectActivation());
             if (!Stream.Check(TokenType.ClosedBracket))
             {
-                Stream.Consume(TokenType.ValueSeparator, "Expected ',' between EffectActivations", Onactivation.synchroTypes);
+                Stream.Consume(TokenType.ValueSeparator, "Expected ',' between EffectActivations", OnActivation.synchroTypes);
             }
         }
-        return new Onactivation(activations);
+        return new OnActivation(activations);
     }
 
     // Analiza el campo de range de una card
@@ -428,7 +428,8 @@ public class Parser
 
         return (string)name.literal;
     }
-    ParameterDef ParametersDefinition()
+    
+    ParameterDefinition ParametersDefinition()
     {
         Dictionary<string, ExpressionType> parameters = new Dictionary<string, ExpressionType>();
         Token check = Stream.Consume(TokenType.AssignParams, "Expected ':' after Params construction", EffectDefinition.moduleTypes);
@@ -437,20 +438,20 @@ public class Parser
         if (check == null) return null;
         while (!Stream.Match(TokenType.ClosedBrace))
         {
-            Token name = Stream.Consume(TokenType.Identifier, "Invalid parameter name", ParameterDef.moduleTypes);
+            Token name = Stream.Consume(TokenType.Identifier, "Invalid parameter name", ParameterDefinition.moduleTypes);
             if (name == null) continue;
             if (parameters.ContainsKey(name.lexeme))
             {
-                Stream.Error(Stream.tokens[Stream.position-1], $"The effect already contains {name.lexeme} parameter", ParameterDef.moduleTypes);
+                Stream.Error(Stream.tokens[Stream.position-1], $"The effect already contains {name.lexeme} parameter", ParameterDefinition.moduleTypes);
                 continue;
             }
-            check = Stream.Consume(TokenType.AssignParams, "Expected ':' after parameter name", ParameterDef.moduleTypes);
+            check = Stream.Consume(TokenType.AssignParams, "Expected ':' after parameter name", ParameterDefinition.moduleTypes);
             if (check == null) continue;
             if (Stream.Match(new List<TokenType>() { TokenType.Number, TokenType.String, TokenType.Bool }))
                 parameters[name.lexeme] = Stream.GetStringType(Stream.tokens[Stream.position-1].lexeme);
-            else Stream.Error(Stream.Peek(), "Invalid parameter type", ParameterDef.moduleTypes);
+            else Stream.Error(Stream.Peek(), "Invalid parameter type", ParameterDefinition.moduleTypes);
         }
-        return new ParameterDef(parameters);
+        return new ParameterDefinition(parameters);
     }
 
     public IExpression ParseEquality()
@@ -461,7 +462,7 @@ public class Parser
         {
             Token operation = Stream.tokens[Stream.position-1];
             IExpression right = ParseStringy();
-            if (operation.type == TokenType.ExclamationEqual) expr = new Differ(expr, right, operation);
+            if (operation.type == TokenType.ExclamationEqual) expr = new Different(expr, right, operation);
             else expr = new Equal(expr, right, operation);
         }
         return expr;
@@ -474,8 +475,8 @@ public class Parser
         {
             Token operation = Stream.tokens[Stream.position-1];
             IExpression right = Comparison();
-            if (operation.type == TokenType.Concat) expr = new Join(expr, right, operation);
-            else expr = new SpaceJoin(expr, right, operation);
+            if (operation.type == TokenType.Concat) expr = new Concat(expr, right, operation);
+            else expr = new ConcatSpace(expr, right, operation);
         }
         return expr;
     }
@@ -512,8 +513,8 @@ public class Parser
         {
             Token operation = Stream.tokens[Stream.position-1];
             IExpression right = Factor();
-            if (operation.type == TokenType.Add) expr = new Add(expr, right, operation);
-            else expr = new Sub(expr, right, operation);
+            if (operation.type == TokenType.Add) expr = new Sum(expr, right, operation);
+            else expr = new Substraction(expr, right, operation);
         }
         return expr;
     }
@@ -570,7 +571,7 @@ public class Parser
         if (Stream.Match(TokenType.OpenParen))
         {
             IExpression expr = ParseExpression();
-            Token check = Stream.Consume(TokenType.ClosedParen, "Expect ')' after expression", Atom.moduletypes);
+            Token check = Stream.Consume(TokenType.ClosedParen, "Expect ')' after expression", Atom.moduleTypes);
             if (check == null) return null;
             return expr;
         }
@@ -584,8 +585,8 @@ public class Parser
             return left;
         }
 
-        if (Stream.Check(TokenType.Dot)) Stream.Error(Stream.Peek(), "Invalid property access", Atom.moduletypes);
-        else Stream.Error(Stream.Peek(), "Expect expression", Atom.moduletypes);
+        if (Stream.Check(TokenType.Dot)) Stream.Error(Stream.Peek(), "Invalid property access", Atom.moduleTypes);
+        else Stream.Error(Stream.Peek(), "Expect expression", Atom.moduleTypes);
         return null;
     }
 
@@ -616,11 +617,11 @@ public class Parser
                 if (Stream.Check(types))
                 {
 
-                    Token player = Stream.Consume(TokenType.OpenParen, "Expected Player Argument", Atom.moduletypes);
+                    Token player = Stream.Consume(TokenType.OpenParen, "Expected Player Argument", Atom.moduleTypes);
                     if (player == null) return null;
 
                     IExpression arg = ParseExpression();
-                    check = Stream.Consume(TokenType.ClosedParen, "Expected ')' after Player Argument", Atom.moduletypes);
+                    check = Stream.Consume(TokenType.ClosedParen, "Expected ')' after Player Argument", Atom.moduleTypes);
                     if (check == null) return null;
 
                     switch (aux.type)
@@ -646,33 +647,33 @@ public class Parser
 
             else if (Stream.Match(TokenType.Find))
             {
-                Token argument = Stream.Consume(TokenType.OpenParen, "Expected '(' after method", Atom.moduletypes);
+                Token argument = Stream.Consume(TokenType.OpenParen, "Expected '(' after method", Atom.moduleTypes);
                 if (argument == null) return null;
 
-                check = Stream.Consume(TokenType.OpenParen, "Expected '('", Atom.moduletypes);
+                check = Stream.Consume(TokenType.OpenParen, "Expected '('", Atom.moduleTypes);
                 if (check == null) return null;
 
-                Token parameter = Stream.Consume(TokenType.Identifier, "Invalid predicate argument", Atom.moduletypes);
+                Token parameter = Stream.Consume(TokenType.Identifier, "Invalid predicate argument", Atom.moduleTypes);
                 if (parameter == null) return null;
 
-                check = Stream.Consume(TokenType.ClosedParen, "Expeted ')' after predicate argument", Atom.moduletypes);
+                check = Stream.Consume(TokenType.ClosedParen, "Expeted ')' after predicate argument", Atom.moduleTypes);
                 if (check == null) return null;
 
-                check = Stream.Consume(TokenType.Arrow, "Expected predicate function call", Atom.moduletypes);
+                check = Stream.Consume(TokenType.Arrow, "Expected predicate function call", Atom.moduleTypes);
                 if (check == null) return null;
 
                 IExpression predicate = ParseExpression();
-                check = Stream.Consume(TokenType.ClosedParen, "Expected ')' after predicate", Atom.moduletypes);
+                check = Stream.Consume(TokenType.ClosedParen, "Expected ')' after predicate", Atom.moduleTypes);
                 if (check == null) return null;
 
                 left = Indexer(new ListFind(left, predicate, parameter, dot, argument));
             }
             else if (Stream.Match(TokenType.Pop))
             {
-                check = Stream.Consume(TokenType.OpenParen, "Expected '(' after method", Atom.moduletypes);
+                check = Stream.Consume(TokenType.OpenParen, "Expected '(' after method", Atom.moduleTypes);
                 if (check == null) return null;
 
-                check = Stream.Consume(TokenType.ClosedParen, "Expected ')' after method", Atom.moduletypes);
+                check = Stream.Consume(TokenType.ClosedParen, "Expected ')' after method", Atom.moduleTypes);
                 if (check == null) return null;
 
                 left = new Pop(left, dot);
@@ -696,7 +697,7 @@ public class Parser
                 }
                 else
                 {
-                    Stream.Error(Stream.Peek(), "Invalid property access", Atom.moduletypes);
+                    Stream.Error(Stream.Peek(), "Invalid property access", Atom.moduleTypes);
                     return null;
                 }
             }
@@ -712,7 +713,7 @@ public class Parser
         {
             Token indexToken = Stream.tokens[Stream.position-1];
             IExpression index = ParseExpression();
-            Token check = Stream.Consume(TokenType.ClosedBracket, "Expected ']' after List Indexing", Atom.moduletypes);
+            Token check = Stream.Consume(TokenType.ClosedBracket, "Expected ']' after List Indexing", Atom.moduleTypes);
             if (check == null) return null;
             if (list is RangeAccess)
             {
@@ -924,12 +925,12 @@ public class Parser
             }
             if (Stream.Match(TokenType.Params))
             {
-                if (definition.parameterdefs != null)
+                if (definition.parameterDefs != null)
                 {
                     Stream.Error(Stream.tokens[Stream.position-1], "Params was already declared in this effect", EffectDefinition.moduleTypes);
                     continue;
                 }
-                definition.parameterdefs = ParametersDefinition();
+                definition.parameterDefs = ParametersDefinition();
                 if(Stream.tokens[Stream.position].type == TokenType.ValueSeparator) Stream.Next();
                 continue;
             }
