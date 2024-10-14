@@ -5,15 +5,19 @@ using TMPro;
 using UnityEngine.UI;
 using System;
 using System.Linq;
+using UnityEditor;
 
 public static class DSL
 {   
-    static DSLCompiler console = GameObject.Find("ButtonCompile").GetComponent<DSLCompiler>();
-
+    //static DSLCompiler console = GameObject.Find("ButtonCompile").GetComponent<DSLCompiler>();
+    static EditorCardController controller = GameObject.Find("EditorCardController").GetComponent<EditorCardController>();
     static bool hasError = false;
+
+    static string path = @"Assets/SOCard/Resources/Cards";
+
     public static void AddToConsole(string message)
     {   
-        console.consoleText.text += message + "\n";
+        controller.console.text += message + "\n";
     }
     public static void BreakCompilation()
     {
@@ -22,9 +26,9 @@ public static class DSL
     }
     public static void Compile(string code)
     {   
-        console = GameObject.Find("ButtonCompile").GetComponent<DSLCompiler>();
+        //console = GameObject.Find("ButtonCompile").GetComponent<DSLCompiler>();
      
-        console.consoleText.text = "";
+        controller.console.text = "";
 
         hasError = false;
 
@@ -74,21 +78,29 @@ public static class DSL
             switch(card.type){
                 case Card.Types.Silver:
                 case Card.Types.Golden:
-                    newCard = new UnitCard(50 + DataManager.myStringList.Count, card.name, null, card.faction, card.type, Resources.Load<Sprite>("DefaultUnitCardImage"), Resources.Load<Sprite>("CardBack"), (int)card.power, Tools.GetCardPositions(card.position), card.activation, 100, false);
-                    // newcard = new UnitCard(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, (int)card.power, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
+                    newCard = ScriptableObject.CreateInstance<UnitCard>();
+                    newCard.Initialize(50 + DataManager.myStringList.Count, card.name, null, card.faction, card.type, Resources.Load<Sprite>("DefaultUnitCardImage"), Resources.Load<Sprite>("CardBack"), (int)card.power, Tools.GetCardPositions(card.position), card.activation, 100, false);
+                    AssetDatabase.CreateAsset(newCard, path+$"/{card.name}.asset");
                     break;
                 case Card.Types.Increase:
-                    newCard = new EspecialCard(50 + DataManager.myStringList.Count, card.name, null, card.type, card.faction, Resources.Load<Sprite>("DefaultImage"), Resources.Load<Sprite>("CardBack"), Tools.GetCardPositions(card.position), card.activation, 100);
-                    // newCard = new EspecialCard(50 + DataManager.myStringList.Count, null, card.name, Resources.Load<Sprite>("DefaultImage"), card.type, card.activation.activations[0].effect.definition, card.faction, Tools.GetCardPositions(card.position), card.activation, 0, Tools.GetCardRow(Tools.GetCardPositions(card.position)), 100);
+                    newCard = ScriptableObject.CreateInstance<EspecialCard>();
+                    newCard.Initialize(50 + DataManager.myStringList.Count, card.name, null, card.faction, card.type, Resources.Load<Sprite>("DefaultIncraseImage"), Resources.Load<Sprite>("CardBack"),0, Tools.GetCardPositions(card.position), card.activation, 100, false);
+                    AssetDatabase.CreateAsset(newCard, path+$"/{card.name}.asset");
                     break;
-                case Card.Types.Weather:
-                    newCard = new EspecialCard(50 + DataManager.myStringList.Count, card.name, null, card.type, card.faction, Resources.Load<Sprite>("DefaultImage"), Resources.Load<Sprite>("CardBack"), Tools.GetCardPositions(card.position), card.activation, 100);
+                case Card.Types.Climate:
+                    newCard = ScriptableObject.CreateInstance<EspecialCard>();
+                    newCard.Initialize(50 + DataManager.myStringList.Count, card.name, null, card.faction, card.type, Resources.Load<Sprite>("DefaultWeatherImage"), Resources.Load<Sprite>("CardBack"), 0, Tools.GetCardPositions(card.position), card.activation, 100, false);
+                    AssetDatabase.CreateAsset(newCard, path+$"/{card.name}.asset");
                     break;
                 case Card.Types.Dump:
-                    newCard = new EspecialCard(50 + DataManager.myStringList.Count, card.name, null, card.type, card.faction, Resources.Load<Sprite>("DefaultImage"), Resources.Load<Sprite>("CardBack"), Tools.GetCardPositions(card.position), card.activation, 100);
+                    newCard = ScriptableObject.CreateInstance<EspecialCard>();
+                    newCard.Initialize(50 + DataManager.myStringList.Count, card.name, null, card.faction, card.type, Resources.Load<Sprite>("DefaultDumpImage"), Resources.Load<Sprite>("CardBack"), 0, Tools.GetCardPositions(card.position), card.activation, 100, false);
+                    AssetDatabase.CreateAsset(newCard, path+$"/{card.name}.asset");
                     break;
                 case Card.Types.Leader:
-                    newCard = new UnitCard(50 + DataManager.myStringList.Count, card.name, null, card.faction, card.type, Resources.Load<Sprite>("DefaultUnitCardImage"), Resources.Load<Sprite>("CardBack"), (int)card.power, Tools.GetCardPositions(card.position), card.activation, 100, true);
+                    newCard = ScriptableObject.CreateInstance<UnitCard>();
+                    newCard.Initialize(50 + DataManager.myStringList.Count, card.name, null, card.faction, card.type, Resources.Load<Sprite>("DefaultLeaderCardImage"), Resources.Load<Sprite>("CardBack"), (int)card.power, Tools.GetCardPositions(card.position), card.activation, 100, true);
+                    AssetDatabase.CreateAsset(newCard, path+$"/{card.name}.asset");
                     break;    
             }
             if(card.activation.activations[0].effect.definition != "DrawCard"){

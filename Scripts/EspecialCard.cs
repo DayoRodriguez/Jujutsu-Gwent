@@ -52,4 +52,19 @@ public class EspecialCard : Card
     {
         return 0;
     }
+
+    public override void Initialize(int id, string name, Owner? owner, string faction, Types? type, Sprite image, Sprite backImage, int power, List<Position> positions, OnActivation activation, int effect, bool isLeader)
+    {
+        this.id = id;
+        this.name = name;
+        types = type.ToString();
+        this.faction = faction;
+        this.type = type;
+        this.owner = owner;
+        this.positions = positions;
+        this.activation = activation;
+        effectN = effect;
+        this.spriteImage = spriteImage;
+        cardBack = backImage;
+    }
 }

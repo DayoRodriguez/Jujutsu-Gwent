@@ -413,7 +413,7 @@ public class SemanticCheck
                 if (card.power != null) SemanticError(card.keyword, "Invalid card, leader card cannot have power field");
                 if (card.position.Count != 0) SemanticError(card.keyword, "Invalid card, leader card position field must be empty");
                 break;
-            case Card.Types.Weather:
+            case Card.Types.Climate:
                 if (card.power != null) SemanticError(card.keyword, "Invalid card, weather card cannot have power field");
                 if (card.position.Count == 0) SemanticError(card.keyword, "Invalid card, weather card position field cannot be empty");
                 break;

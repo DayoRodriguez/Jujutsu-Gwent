@@ -95,7 +95,7 @@ public class AddCardEffect : MonoBehaviour , ICardEffect
         DisplayCard[] cards = orig.GetComponentsInChildren<DisplayCard>();
 
         foreach(DisplayCard c in cards)
-        {
+        {   
             if(b && c.card.isUnit) cardsToAdd.Add(c);
             else if(!c.card.isUnit) cardsToAdd.Add(c);
         }

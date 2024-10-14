@@ -13,7 +13,7 @@ public static class Tools
         {
             case "Oro": return Card.Types.Golden;
             // case "Plata": return Card.Type.Silver;
-            case "Clima": return Card.Types.Weather;
+            case "Clima": return Card.Types.Climate;
             case "Aumento": return Card.Types.Increase;
             case "Líder": return Card.Types.Leader;
             // case "Señuelo": return Card.Type.Decoy;
@@ -27,7 +27,7 @@ public static class Tools
         {
             case Card.Types.Golden: return "Oro";
             case Card.Types.Silver: return "Plata";
-            case Card.Types.Weather: return "Clima";
+            case Card.Types.Climate: return "Clima";
             case Card.Types.Increase: return "Aumento";
             case Card.Types.Leader: return "Lider";
             // case Card.Type.Decoy: return "Señuelo";

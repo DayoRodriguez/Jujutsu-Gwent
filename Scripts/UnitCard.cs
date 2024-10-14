@@ -22,6 +22,7 @@ public class UnitCard : Card
 
     public UnitCard(int id, string name, Owner? owner, string faction, Types? type, Sprite spriteImage, Sprite backImage, int power, List<Position> positions, OnActivation activation, int effect, bool isLeader)
     {
+        
         this.id = id; 
         this.name = name;
         this.owner = owner;
@@ -31,9 +32,9 @@ public class UnitCard : Card
         cardBack = backImage;
         this.power = power;
         this.positions = positions;
-        if(positions[0] != null) kindAttack1 = positions[0].ToString();
-        if(positions[1] != null) kindAttack2 = positions[1].ToString();
-        if(positions[2] != null) kindAttack3 = positions[2].ToString();
+        if(positions.Count >= 0 && positions[0] != null) kindAttack1 = positions[0].ToString();
+        if(positions.Count >= 1 && positions[1] != null) kindAttack2 = positions[1].ToString();
+        if(positions.Count == 2 && positions[2] != null) kindAttack3 = positions[2].ToString();
         this.activation = activation;
         this.effectN = effect;
         if(type == Types.Golden) isSpecial = true;
@@ -67,4 +68,23 @@ public class UnitCard : Card
         return this.power;
     }
 
+    public override void Initialize(int id, string name, Owner? owner, string faction, Types? type, Sprite image, Sprite backImage, int power, List<Position> positions, OnActivation activation, int effect, bool isLeader)
+    {
+        this.id = id; 
+        this.name = name;
+        this.owner = owner;
+        this.faction = faction;
+        this.type = type;
+        this.spriteImage = spriteImage;
+        cardBack = backImage;
+        this.power = power;
+        this.positions = positions;
+        // if(positions.Count >= 0 && positions[0] != null) kindAttack1 = positions[0].ToString();
+        // if(positions.Count >= 1 && positions[1] != null) kindAttack2 = positions[1].ToString();
+        // if(positions.Count == 2 && positions[2] != null) kindAttack3 = positions[2].ToString();
+        this.activation = activation;
+        this.effectN = effect;
+        if(type == Types.Golden) isSpecial = true;
+        this.isLider = isLeader;   
+    }
 }

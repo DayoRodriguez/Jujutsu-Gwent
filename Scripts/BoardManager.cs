@@ -130,6 +130,7 @@
         {
             Card card = cardObject.GetComponent<DisplayCard>().card;
             string[] types = card.GetKind();
+            card.owner = cardObject.transform.parent == transformPlayerHand ? Card.Owner.Player : Card.Owner.Opponent;
 
             if (card.isUnit && IsValidUnitRow(types, row))
             {

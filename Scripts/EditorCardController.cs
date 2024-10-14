@@ -23,7 +23,7 @@ public class EditorCardController : MonoBehaviour
 
     void CompilerCode()
     {
-        
+        DSL.Compile(inputField.text);
     }
 
 }

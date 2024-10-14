@@ -17,10 +17,10 @@ public abstract class GameComponent
     {
         for (int i=cards.Count-1;i>0;i--)
         {
-            int randomIndex=UnityEngine.Random.Range(0,i+1);
-            Card container=cards[i];
-            cards[i]=cards[randomIndex];
-            cards[randomIndex]=container;
+            int randomIndex = Random.Range(0,i+1);
+            Card container = cards[i];
+            cards[i] = cards[randomIndex];
+            cards[randomIndex] = container;
         }
     }
 }

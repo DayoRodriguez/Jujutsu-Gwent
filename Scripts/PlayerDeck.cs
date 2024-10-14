@@ -139,33 +139,35 @@ public class PlayerDeck : MonoBehaviour
             int random = Random.Range(0, cardsToDraw.Length);
             DisplayCard selectedCard = cardsToDraw[random];
             cardsToDraw = RemovedCardFromArray(cardsToDraw, random);
+            
+            DisplayCard cloneCard = Instantiate(selectedCard);
 
-            selectedCard.card.isActivated = true;
-            Card copyCard = Instantiate(selectedCard.card);
+            Card copyCard = Instantiate(cloneCard.card);
+            
             copyCard.isActivated = true;
-            selectedCard.SetUp(copyCard);
+            cloneCard.SetUp(copyCard);
 
-            selectedCard.transform.SetParent(hand);
-            selectedCard.transform.localPosition = Vector3.zero;
-            selectedCard.transform.localRotation = Quaternion.identity;
-            selectedCard.transform.localScale = Vector3.one;
+            cloneCard.transform.SetParent(hand);
+            cloneCard.transform.localPosition = Vector3.zero;
+            cloneCard.transform.localRotation = Quaternion.identity;
+            cloneCard.transform.localScale = Vector3.one;
 
             if(selectedCard.gameObject.GetComponent<CardLogic>() == null)
             {
-                selectedCard.gameObject.AddComponent<CardLogic>();
+                cloneCard.gameObject.AddComponent<CardLogic>();
             }
             
             if(hand == board.transformPlayerHand)
             {
-                selectedCard.card.owner = Card.Owner.Player;
-                Debug.Log("La carta es" + selectedCard.card.name);
-                Debug.Log("La carta esta en la mano del " + selectedCard.card.owner.ToString());
+                cloneCard.card.owner = Card.Owner.Player;
+                Debug.Log("La carta es" + cloneCard.card.name);
+                Debug.Log("La carta esta en la mano del " + cloneCard.card.owner.ToString());
             }
             else if(hand == board.opponentTransformPlayerHand)
             {
-                selectedCard.card.owner = Card.Owner.Opponent;
-                Debug.Log("La carta es" + selectedCard.card.name);
-                Debug.Log("La carta esta en la mano del " + selectedCard.card.owner.ToString());
+                cloneCard.card.owner = Card.Owner.Opponent;
+                Debug.Log("La carta es" + cloneCard.card.name);
+                Debug.Log("La carta esta en la mano del " + cloneCard.card.owner.ToString());
             }
         }    
     }
@@ -269,29 +271,31 @@ public class PlayerDeck : MonoBehaviour
             int selector = Random.Range(0, cardsToDraw.Length);
             DisplayCard cardD = cardsToDraw[selector];
 
+            DisplayCard cloneCard = Instantiate(cardD);
+
             if(cardD.gameObject.GetComponent<CardLogic>() == null)
             {
                 cardD.gameObject.AddComponent<CardLogic>();
             }
 
-            cardD.card.isActivated = true;
-            cardD.SetUp(cardD.card);
+            cloneCard.card.isActivated = true;
+            cloneCard.SetUp(cloneCard.card);
 
             if(hand.childCount < 10)
             {
-                cardD.transform.SetParent(hand);
+                cloneCard.transform.SetParent(hand);
             }
             else 
             {
-                if(hand == board.transformPlayerHand) cardD.transform.SetParent(board.transformGraveyard);
-                else if(hand == board.opponentTransformPlayerHand) cardD.transform.SetParent(board.opponentTransformGraveyard);
+                if(hand == board.transformPlayerHand) cloneCard.transform.SetParent(board.transformGraveyard);
+                else if(hand == board.opponentTransformPlayerHand) cloneCard.transform.SetParent(board.opponentTransformGraveyard);
             }
-            cardD.transform.localPosition = Vector3.zero;
-            cardD.transform.localRotation = Quaternion.identity;
-            cardD.transform.localScale = Vector3.one;
+            cloneCard.transform.localPosition = Vector3.zero;
+            cloneCard.transform.localRotation = Quaternion.identity;
+            cloneCard.transform.localScale = Vector3.one;
 
-            if(hand == board.transformPlayerHand) cardD.card.owner = Card.Owner.Player;
-            else if(hand == board.opponentTransformPlayerHand) cardD.card.owner = Card.Owner.Opponent;
+            if(hand == board.transformPlayerHand) cloneCard.card.owner = Card.Owner.Player;
+            else if(hand == board.opponentTransformPlayerHand) cloneCard.card.owner = Card.Owner.Opponent;
         }
     }
 

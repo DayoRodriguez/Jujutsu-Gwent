@@ -38,12 +38,12 @@ public abstract class Card : ScriptableObject
     }
     public enum Types
     {
-        Golden, Silver, Weather, Increase, Leader, Dump  
+        Golden, Silver, Climate, Increase, Leader, Dump  
     }
 
     public enum Position
     {
-        Melee, Ranged, Siege, All, Weather, Increase, Dump
+        Melee, Ranged, Siege, All, Climate, Increase, Dump
     }
 
     public Card(){}
@@ -56,6 +56,7 @@ public abstract class Card : ScriptableObject
 
     public abstract string[] GetKind();
     public abstract int GetPower();
+    public abstract void Initialize(int id, string name, Owner? owner, string faction, Types? type, Sprite image, Sprite backImage, int power, List<Position> positions, OnActivation activation,  int effect, bool isLeader);
 
     public void SetAttack(int n)
     {

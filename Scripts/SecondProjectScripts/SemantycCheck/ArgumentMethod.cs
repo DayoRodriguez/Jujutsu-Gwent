@@ -6,7 +6,7 @@ using UnityEngine;
 
 public abstract class ArgumentMethod: Method
 {
-    public ArgumentMethod(IExpression list,IExpression card, Token accessToken) : base(list,accessToken)
+    public ArgumentMethod(IExpression list,IExpression card, Token accessToken) : base(list, accessToken)
     {
         this.card = card;
     }
